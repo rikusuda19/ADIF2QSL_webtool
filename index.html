@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="./adif_parser.js"></script>
+        <script src="./moment.js"></script>
+        <script src="./moment-timezone.js"></script>
+
+        <style>
+
+            * {
+                box-sizing: border-box;
+                font-size:9pt;
+            }
+
+            @page {
+                size: 100mm 148mm;
+                margin: 0mm;
+            }
+
+            @media print{
+                body{
+                    width:100mm !important;
+                    margin:0px;
+                }
+
+                hr, .no-print{
+                    display: none;
+                }
+            }
+
+
+            #qsl_area{
+                display:grid;
+            }
+
+            .page{
+                position:relative;
+                top:0mm;
+                left:0mm;
+                width: 100mm;
+                height: 148mm;
+                box-sizing: border-box;
+                padding: 0mm 5mm;
+                page-break-after:always;
+                break-after:always;
+                page-break-inside:avoid;
+                break-inside:avoid;
+                display:block;
+                border:0px;
+                margin:0mm;
+            }
+
+            
+            .page:last-child{
+                page-break-after: auto;
+            }
+            
+
+            
+
+            @media screen{
+
+                
+                #qsl_area{
+                    display:flex;
+                    flex-wrap: wrap;
+                    min-width: 120mm;
+                }
+                
+
+                .page{
+                    display:inline-block;
+                    background-color: white;
+                    border: 1px solid #666666;
+                    margin: 10px;
+                }
+
+
+            }
+            
+
+            .table_bureau_call{
+                display: table;
+                position: absolute;
+                top: 11mm;
+                left: 37mm;
+                border-collapse: separate;
+                border-spacing: 2.5mm 0;
+                padding:0;
+                table-layout: fixed;
+            }
+
+            .table_bureau_call tbody td{
+                display: table-cell;
+                vertical-align: middle;
+                width:6.5mm;
+                height:9mm;
+                font-size: 6mm;
+                line-height:6mm;
+                border: 1px solid red;
+                padding:0;
+                text-align:center;
+                font-weight: bold;
+            }
+
+            .table_bureau_call tbody td:last-child{
+                border:none;
+                display: table-cell;
+                vertical-align: bottom;
+                font-size: 3mm;
+                line-height: 3mm;
+                text-align:left;
+                width: 9mm;
+                height:auto;
+                position:absolute;
+                bottom: 0mm;
+                left: 53.75mm;
+            }
+
+            .wrapper_to_radio{
+                position:absolute;
+                width: 25mm;
+                height:13mm;
+                top: 6mm;
+                left: 5mm;
+                border-collapse: collapse;
+            }
+
+            .wrapper_to_radio th{
+                height: 4mm;
+                text-align:left;
+                font-weight: normal;
+            }
+
+            .box_to_radio{
+                height: 9mm;
+                text-align:center;
+                vertical-align: bottom;
+                border-bottom: 1px solid black;
+                padding :1mm ;
+                font-weight:bold;
+            }
+
+            .data_area{
+                position:absolute;
+                top: 25mm;
+                left:0mm;
+                width: 100%;
+            }
+
+            .table_qsoData{
+                position:relative;
+                margin: 0 auto;
+                font-size: 9pt;
+            }
+
+            .table_qsoData td, .table_qsoData th{
+                text-align: center;
+                padding: 0mm 1mm;
+            }
+
+            .hidden{
+                display:none; 
+            }
+        </style>
+
+
+    </head>
+
+    <body>
+
+        <h2 class="no-print" style="font-size:large;">
+            ADIF -> QSL Maker
+        </h2>
+
+        <p class="no-print"> (c) Riku Suda (JR2KHB). 2022-12-20: first publishing (experimental version)</p>
+
+        <p class="no-print"><input type="file" multiple onChange="parse_adi(this.files[0])"></input></p>
+
+        <hr>
+
+        <div id="qsl_area">
+            <section id="qsl_template" class="page">
+                <table class="table_bureau_call">
+                    <tbody>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>   
+                        </tr> 
+                    </tbody>
+                </table>
+
+                <table class="wrapper_to_radio">
+                    <tr><th>TO RADIO</th></tr>
+                    <tr><td class="box_to_radio"></td></tr>
+                </table>
+
+                <div class="data_area">
+                    <div class="statement" style="text-align:center; font-weight:bold; font-size:12pt; margin-bottom: 3mm;">Confirming our QSO</div>
+                    <table class="table_qsoData" id="table_qsoData_template">
+                        <thead>
+                        <tr>
+                        <th>DATE</th>
+                        <th>TIME</th>
+                        <th>FREQ</th>
+                        <th>MODE</th>
+                        <th>RST</th>
+                        <th>OP</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td></td>
+                                <td id="table_timezone_template"></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </section>
+
+        </div>
+        
+        <script>
+            const doc_body = document.getElementById("qsl_area");
+            const qsl_template = document.getElementById("qsl_template");
+
+            function parse_adi(file){
+
+                doc_body.innerHTML = "";
+
+                let file_reader = new FileReader();
+
+                file_reader.readAsText(file);
+                
+                file_reader.onload = function(event){
+                    let adi = event.target.result;
+                    //doc_body.innerText += adi;
+
+                    let ap = new AdifParser(adi);
+                    //doc_body.innerText = JSON.stringify(ap.parseTopLevel());
+
+                    display_QSO_data(ap.parseTopLevel());
+                }
+            }
+
+            function display_QSO_data(adifObj){
+                let records = adifObj.records;
+
+                let callList = Array.from(new Set(records.map(elm => elm.call).sort())).filter(elm => (elm));
+                
+                let qslData = 
+                    callList.map(
+                        callSign => ({
+                            "callSign": callSign,
+                            "qsoData": records.filter(
+                                elm => (elm.call === callSign)
+                                )
+                        })
+                );
+
+                
+                qslData
+                // .sort((d1,d2) => d2.qsoData.length -  d1.qsoData.length)
+                //.filter(data => new RegExp(/^(?:J[A-S]|7[J-N]|8[J-N])/gm).test(datum.callSign))
+                .forEach(
+                    datum => {
+                        let isJA = new RegExp(/^(?:J[A-S]|7[J-N]|8[J-N])/gm).test(datum.callSign);
+                        let safeCallSign = datum.callSign?.replace("/","-");
+
+                        // 1ページ作る
+                        let section = qsl_template.cloneNode(true);
+                        section.id = "qsl_" + safeCallSign;
+                        section.className = "page";
+                        
+                        // ページを設置
+                        doc_body.appendChild(section);
+
+                        //to Radio を記入
+                        let txt_to_radio = document.querySelector("#" + section.id + " .box_to_radio");
+                        txt_to_radio.appendChild(document.createTextNode(datum.callSign));
+                        
+                        // 転送枠
+
+                        let callSignBoxs_for_bureau = document.querySelectorAll("#" + section.id + " .table_bureau_call tbody td");
+                        let callSignForBureau = JACallSignSplitter(datum.callSign);
+
+                        if(isJA){
+                            for (let index = 0; index < callSignForBureau.length; index++) {
+                                if(index<=5){
+                                    callSignBoxs_for_bureau[index].appendChild(document.createTextNode(callSignForBureau[index] || ''));
+                                }
+                                else{
+                                    callSignBoxs_for_bureau[6]
+                                    .appendChild(document.createTextNode(callSignForBureau.slice(6)));
+                                    break;
+                                }
+                                
+                            }
+                        }
+                        else{
+                            document.querySelector("#" + section.id + " .table_bureau_call").className += "hidden";
+                        }
+
+                        // QSO / QSOs
+                        if(datum.qsoData.length > 1){
+                            document.querySelector("#" + section.id + " .statement").innerText += "s";
+                        }
+
+
+                        // 表を作る
+                        let data_table = document.querySelector("#" + section.id + " #table_qsoData_template");
+                        let table_id = "table_qsoData_" + safeCallSign;
+                        data_table.id = table_id;
+
+                        let timeZoneIndicator = document.querySelector("#" + table_id + " #table_timezone_template");
+                        timeZoneIndicator.id = "table_timezone_" + safeCallSign;
+                        timeZoneIndicator.appendChild(document.createTextNode(isJA ? "(JST)" : "(UTC)"))
+                                               
+
+                        // 表に書き込む
+                        datum.qsoData.forEach(qso => {
+                                let tableRow = data_table.tBodies[0].insertRow(-1);
+
+                                let qsoDateTime = date_time_converter(qso.qso_date, qso.time_on || qso.time_off);
+
+                                qsoDateTime = isJA ? qsoDateTime.tz("Asia/Tokyo") : qsoDateTime;
+
+                                let dateCell = tableRow.insertCell(-1);
+                                dateCell.className = "qsoDatumCell qsoDatum_date";
+                                dateCell.appendChild(document.createTextNode(qsoDateTime.format("YYYY-MM-DD")));
+
+                                let timeCell = tableRow.insertCell(-1);
+                                timeCell.className = "qsoDatumCell qsoDatum_time";
+                                timeCell.appendChild(document.createTextNode(qsoDateTime.format("HH:mm")));
+
+                                let bandCell = tableRow.insertCell(-1);
+                                bandCell.className = "qsoDatumCell qsoDatum_band";
+                                bandCell.appendChild(document.createTextNode(qso.freq || qso.band));
+
+                                let modeCell = tableRow.insertCell(-1);
+                                modeCell.className = "qsoDatumCell qsoDatum_mode";
+                                modeCell.appendChild(document.createTextNode(qso.mode));
+
+                                let reportCell = tableRow.insertCell(-1);
+                                reportCell.className = "qsoDatumCell qsoDatum_report";
+                                reportCell.appendChild(document.createTextNode(qso.rst_sent));
+
+                                let opCell = tableRow.insertCell(-1);
+                                opCell.className = "qsoDatumCell qsoDatum_op";
+                                opCell.appendChild(document.createTextNode(qso.operator || qso.station_callsign || ""));
+
+                            }
+                        )                      
+                    }
+                )
+            }
+        
+            function date_time_converter(dateExp, timeExp = "0000"){
+                if(dateExp?.length != 8 || (timeExp?.length != 4 && timeExp?.length != 6)){
+                    return null;
+                }
+
+                let dateMatch = dateExp.match(/^(?<year>\d{4})(?<month>\d{2})(?<day>\d{2})$/);
+                let timeMatch = timeExp.match(/^(?<hour>\d{2})(?<minute>\d{2})(?<second>\d{2})?$/);
+
+                if(!dateMatch || !timeMatch){
+                    return null;
+                }
+
+                let ISOString = dateMatch.groups.year + "-"
+                    + dateMatch.groups.month + "-"
+                    + dateMatch.groups.day + "T"
+                    + timeMatch.groups.hour + ":"
+                    + timeMatch.groups.minute + ":"
+                    + (timeMatch.groups.second || "00")
+                    + "Z";
+
+                return moment.utc(ISOString);
+            }
+
+            
+            function JACallSignSplitter(callSign){
+                let callSignParts = callSign?.split("/");
+                
+                let callSignLetters = [];
+
+                switch (callSignParts.length) {
+                    case 0:
+                        return null;
+                        break;
+
+                    // case 1:
+                    // case 2:
+                        callSignLetters = callSignParts[0];
+                        break;
+                    
+                    default:
+                        callSignLetters = callSignParts.sort((a, b) => b.length - a.length)[0];
+                        break;
+                }
+
+                return callSignLetters;
+            }
+
+        
+        </script>   
+
+
+
+    </body>
+</html>
