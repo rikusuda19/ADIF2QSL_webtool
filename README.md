@@ -13,4 +13,4 @@ An experimental webtool which produces printable QSL cards from ADIF files.
   Originated from [K0SWE's adif-parser-ts](https://github.com/k0swe/adif-parser-ts) (typescript)
 - [moment.js](https://momentjs.com/), [moment-timezone.js](https://momentjs.com/timezone/)
 
-Codes I developped are written directly in index.html, which may be separated as independent .js or .css files later.
+Codes I developped are written directly in index.html, which probablly should be separated as independent .js or .css files later.
