@@ -2,6 +2,9 @@
 
 An experimental webtool which produces printable QSL cards from ADIF files.
 
+Here you can play with it ;)
+https://www.jr2khb.net/qsl_maker/index.html
+
 ## Usage
 - Open "index.html" on your browser.
 - Choose ADIF file.
