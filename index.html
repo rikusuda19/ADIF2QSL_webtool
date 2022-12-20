@@ -33,6 +33,17 @@
                 display:grid;
             }
 
+
+            .qsl_control{
+                text-align:center;
+                vertical-align: middle;
+            }
+
+            .qsl_control>div{
+                display:inline-block;
+            }
+
+
             .page{
                 position:relative;
                 top:0mm;
@@ -75,9 +86,20 @@
                     margin: 10px;
                 }
 
+                section{
+                    margin:20px;
+                }
 
             }
             
+            .txt_via{
+                position: absolute;
+                top: 13.5mm;
+                left: 32mm;
+                width: 5mm;
+                color: red;
+                font-weight:bold;
+            }
 
             .table_bureau_call{
                 display: table;
@@ -92,13 +114,12 @@
 
             .table_bureau_call tbody td{
                 display: table-cell;
-                vertical-align: middle;
+                vertical-align: bottom;
                 width:6.5mm;
                 height:9mm;
                 font-size: 6mm;
                 line-height:6mm;
-                border: 1px solid red;
-                padding:0;
+                padding:0 0 1mm 0;
                 text-align:center;
                 font-weight: bold;
             }
@@ -115,6 +136,19 @@
                 position:absolute;
                 bottom: 0mm;
                 left: 53.75mm;
+            }
+
+            .red_bordered{
+                border: 1px solid red;
+            }
+
+            .dot_bordered{
+                border:1px dotted black;
+            }
+
+            .bottom_bordered{
+                border: none;
+                border-bottom: 1px solid black;
             }
 
             .wrapper_to_radio{
@@ -180,51 +214,78 @@
         <hr>
 
         <div id="qsl_area">
-            <section id="qsl_template" class="page">
-                <table class="table_bureau_call">
-                    <tbody>
-                        <tr>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>   
-                        </tr> 
-                    </tbody>
-                </table>
+            <section id="qsl_template">
+                <div id="qsl_control_template" class="no-print qsl_control">
+                    
+                    <div style="margin-right:2mm; display:inline-block;">
+                        <input type="checkbox" id="chk_JARLstyle_template" class="no-print chk_JARLstyle" checked>
+                        <label for="chk_JARLstyle_template">JARL style</label>
+                    </div>
 
-                <table class="wrapper_to_radio">
-                    <tr><th>TO RADIO</th></tr>
-                    <tr><td class="box_to_radio"></td></tr>
-                </table>
+                    <div style="margin-right:2mm; display:inline-block;">
+                        <label for="txt_qslto_callsign_template">QSL to</label>
+                        <input type="text" id="txt_qslto_callsign_template" class="no-print txt_qslto_callsign" maxlength="9" size="10">
+                    </div>
 
-                <div class="data_area">
-                    <div class="statement" style="text-align:center; font-weight:bold; font-size:12pt; margin-bottom: 3mm;">Confirming our QSO</div>
-                    <table class="table_qsoData" id="table_qsoData_template">
-                        <thead>
-                        <tr>
-                        <th>DATE</th>
-                        <th>TIME</th>
-                        <th>FREQ</th>
-                        <th>MODE</th>
-                        <th>RST</th>
-                        <th>OP</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        </tbody>
-                        <tfoot>
-                            <tr>
-                                <td></td>
-                                <td id="table_timezone_template"></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                            </tr>
-                        </tfoot>
+                    <div style="margin-right:2mm; display:inline-block;">
+                        <input type="checkbox" id="chk_JARLstyle_via_template" class="no-print chk_JARLstyle_via">
+                        <label for="chk_JARLstyle_via_template">VIA</label>
+                    </div>
+
+                    <input type="button" id="button_redraw_template" class="no-print button_redraw" value="Redraw" onclick="qslTo_redraw(this.parentNode.parentNode.id)">
+
+                </div>
+
+
+                <div class="page">
+                    <div class="txt_via hidden" id="txt_via_template">VIA</div>
+
+                    <table class="wrapper_to_radio">
+                        <tr><th>TO RADIO</th></tr>
+                        <tr><td class="box_to_radio"></td></tr>
                     </table>
+
+                    <table class="table_bureau_call">
+                        <tbody>
+                            <tr>
+                                <td class="red_bordered"></td>
+                                <td class="red_bordered"></td>
+                                <td class="red_bordered"></td>
+                                <td class="red_bordered"></td>
+                                <td class="red_bordered"></td>
+                                <td class="red_bordered"></td>
+                                <td class="red_bordered"></td>   
+                            </tr> 
+                        </tbody>
+                    </table>
+
+
+                    <div class="data_area">
+                        <div class="statement" style="text-align:center; font-weight:bold; font-size:12pt; margin-bottom: 3mm;">Confirming our QSO</div>
+                        <table class="table_qsoData" id="table_qsoData_template">
+                            <thead>
+                            <tr>
+                            <th>DATE</th>
+                            <th>TIME</th>
+                            <th>FREQ</th>
+                            <th>MODE</th>
+                            <th>RST</th>
+                            <th>OP</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td></td>
+                                    <td class="tablecell_timezone" id="tablecell_timezone_template"></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
                 </div>
             </section>
 
@@ -278,52 +339,62 @@
                         let safeCallSign = datum.callSign?.replace("/","-");
 
                         // 1ページ作る
-                        let section = qsl_template.cloneNode(true);
-                        section.id = "qsl_" + safeCallSign;
-                        section.className = "page";
+                        let qsl_page = qsl_template.cloneNode(true);
+                        qsl_page.id = "qsl_" + safeCallSign;
                         
+
                         // ページを設置
-                        doc_body.appendChild(section);
+                        doc_body.appendChild(qsl_page);
+
+                        // id を変更
+                        qsl_page.querySelectorAll("*").forEach(item => {
+                            if(item.id){
+                                item.id = item.id.replace("template", safeCallSign);
+                            }
+
+                            if(item.getAttribute("for")){
+                                item.setAttribute("for", item.getAttribute("for").replace("template", safeCallSign));
+                            }
+                        });
 
                         //to Radio を記入
-                        let txt_to_radio = document.querySelector("#" + section.id + " .box_to_radio");
+                        let txt_to_radio = qsl_page.querySelector(".box_to_radio");
+
                         txt_to_radio.appendChild(document.createTextNode(datum.callSign));
                         
-                        // 転送枠
 
-                        let callSignBoxs_for_bureau = document.querySelectorAll("#" + section.id + " .table_bureau_call tbody td");
+                        // 転送枠
+                        let callSignBoxes_for_bureau_wrapper = qsl_page.querySelector(".table_bureau_call");
+                        let callSignBoxes_for_bureau = callSignBoxes_for_bureau_wrapper.querySelectorAll("tbody td");
                         let callSignForBureau = JACallSignSplitter(datum.callSign);
 
+                        let isJARLStyleCheckbox = qsl_page.querySelector("#chk_JARLstyle_" + safeCallSign);
+
+                        let callSignTextBox = qsl_page.querySelector("#txt_qslto_callsign_" + safeCallSign);
+
                         if(isJA){
-                            for (let index = 0; index < callSignForBureau.length; index++) {
-                                if(index<=5){
-                                    callSignBoxs_for_bureau[index].appendChild(document.createTextNode(callSignForBureau[index] || ''));
-                                }
-                                else{
-                                    callSignBoxs_for_bureau[6]
-                                    .appendChild(document.createTextNode(callSignForBureau.slice(6)));
-                                    break;
-                                }
-                                
-                            }
+                            isJARLStyleCheckbox.checked = true;
+                            callSignTextBox.value = callSignForBureau;
                         }
                         else{
-                            document.querySelector("#" + section.id + " .table_bureau_call").className += "hidden";
+                            isJARLStyleCheckbox.checked = false;
+                            callSignTextBox.value = "";
                         }
+
+                        qslTo_redraw(qsl_page.id);
+
 
                         // QSO / QSOs
                         if(datum.qsoData.length > 1){
-                            document.querySelector("#" + section.id + " .statement").innerText += "s";
+                            document.querySelector("#" + qsl_page.id + " .statement").innerText += "s";
                         }
 
 
                         // 表を作る
-                        let data_table = document.querySelector("#" + section.id + " #table_qsoData_template");
-                        let table_id = "table_qsoData_" + safeCallSign;
-                        data_table.id = table_id;
+                        let data_table = document.querySelector("#" + qsl_page.id + " .table_qsoData");
+                        let table_id = data_table.id;
 
-                        let timeZoneIndicator = document.querySelector("#" + table_id + " #table_timezone_template");
-                        timeZoneIndicator.id = "table_timezone_" + safeCallSign;
+                        let timeZoneIndicator = document.querySelector("#" + table_id + " .tablecell_timezone");
                         timeZoneIndicator.appendChild(document.createTextNode(isJA ? "(JST)" : "(UTC)"))
                                                
 
@@ -412,7 +483,55 @@
                 return callSignLetters;
             }
 
-        
+            function qslTo_redraw(sectionID){
+                let qslPage = document.getElementById(sectionID);
+
+                let viaCheckBox = qslPage.querySelector(".chk_JARLstyle_via");
+                let viaText = qslPage.querySelector(".txt_via")
+                
+                let isJARLStyleCheckBox = qslPage.querySelector(".chk_JARLstyle");
+                let JARLStyleCallsignBoxesWrapper =  qslPage.querySelector(".table_bureau_call");
+                let JARLStyleCallsignBoxes = JARLStyleCallsignBoxesWrapper.querySelectorAll("tbody td");
+            
+
+                let qslToCallSignTextBox = qslPage.querySelector(".txt_qslto_callsign")
+
+                if(viaCheckBox.checked){
+                    viaText.classList.remove("hidden");
+                }
+                else {
+                    viaText.classList.add("hidden");
+                }
+
+
+                if(isJARLStyleCheckBox.checked){
+                    JARLStyleCallsignBoxes.forEach(
+                        b => {
+                            b.classList.add("red_bordered");
+                        }
+                    )
+                }
+                else{
+                    JARLStyleCallsignBoxes.forEach(
+                        b => {
+                            b.classList.remove("red_bordered","dot_bordered");
+                        }
+                    )
+                }
+
+                for (let index = 0; index < JARLStyleCallsignBoxes.length; index++) {
+                        if(index < JARLStyleCallsignBoxes.length -1){
+                            JARLStyleCallsignBoxes[index].innerText = qslToCallSignTextBox.value[index] || '';
+                        }
+                        else{
+                            JARLStyleCallsignBoxes[index]
+                            .innerText = qslToCallSignTextBox.value.slice(index) || '';
+                            break;
+                        }
+                        
+                }
+            }
+
         </script>   
 
 
