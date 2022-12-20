@@ -218,8 +218,8 @@
                 <div id="qsl_control_template" class="no-print qsl_control">
                     
                     <div style="margin-right:2mm; display:inline-block;">
-                        <input type="checkbox" id="chk_JARLstyle_template" class="no-print chk_JARLstyle" checked>
-                        <label for="chk_JARLstyle_template">JARL style</label>
+                        <input type="checkbox" id="chk_JARLStyleFrame_template" class="no-print chk_JARLStyleFrame" checked>
+                        <label for="chk_JARLStyleFrame_template">JARL style</label>
                     </div>
 
                     <div style="margin-right:2mm; display:inline-block;">
@@ -228,8 +228,8 @@
                     </div>
 
                     <div style="margin-right:2mm; display:inline-block;">
-                        <input type="checkbox" id="chk_JARLstyle_via_template" class="no-print chk_JARLstyle_via">
-                        <label for="chk_JARLstyle_via_template">VIA</label>
+                        <input type="checkbox" id="chk_via_template" class="no-print chk_via">
+                        <label for="chk_via_template">VIA</label>
                     </div>
 
                     <input type="button" id="button_redraw_template" class="no-print button_redraw" value="Redraw" onclick="qslTo_redraw(this.parentNode.parentNode.id)">
@@ -368,7 +368,7 @@
                         let callSignBoxes_for_bureau = callSignBoxes_for_bureau_wrapper.querySelectorAll("tbody td");
                         let callSignForBureau = JACallSignSplitter(datum.callSign);
 
-                        let isJARLStyleCheckbox = qsl_page.querySelector("#chk_JARLstyle_" + safeCallSign);
+                        let isJARLStyleCheckbox = qsl_page.querySelector("#chk_JARLStyleFrame_" + safeCallSign);
 
                         let callSignTextBox = qsl_page.querySelector("#txt_qslto_callsign_" + safeCallSign);
 
@@ -486,10 +486,10 @@
             function qslTo_redraw(sectionID){
                 let qslPage = document.getElementById(sectionID);
 
-                let viaCheckBox = qslPage.querySelector(".chk_JARLstyle_via");
+                let viaCheckBox = qslPage.querySelector(".chk_via");
                 let viaText = qslPage.querySelector(".txt_via")
                 
-                let isJARLStyleCheckBox = qslPage.querySelector(".chk_JARLstyle");
+                let isJARLStyleCheckBox = qslPage.querySelector(".chk_JARLStyleFrame");
                 let JARLStyleCallsignBoxesWrapper =  qslPage.querySelector(".table_bureau_call");
                 let JARLStyleCallsignBoxes = JARLStyleCallsignBoxesWrapper.querySelectorAll("tbody td");
             
