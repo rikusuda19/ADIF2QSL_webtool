@@ -240,6 +240,10 @@
                 <label for="chk_useJSTForJA">Use JST (= UTC+9) for JA stations</label>
             </p>
             <p>
+                <label for="num_maxRows">Max number of QSO data per card:</label>
+                <input type="number" id="num_maxRows" min="1" max="100" value="10">
+            </p>
+            <p>
                 <input id="btn_adifFile" type="file" onChange="btn_adifFile_clicked(this.files)" ></input>
             </p>
 
@@ -342,10 +346,6 @@
 
             const statusTextArea = document.getElementById("txt_status");
 
-            const defaultOP = document.getElementById("txt_opDefault").value;
-            const defaultDE = document.getElementById("txt_deDefault").value;
-
-            const maxQSOsRow = 5;
 
             let cardCounter;
 
@@ -429,7 +429,7 @@
 
                 
                 qslData
-                //.sort((d1,d2) => d2.qsoData.length -  d1.qsoData.length)
+                .sort((d1,d2) => d2.qsoData.length -  d1.qsoData.length)
                 //.filter(data => new RegExp(/^(?:J[A-S]|7[J-N]|8[J-N])/gm).test(data.callSign))
                 .forEach(
                     datum => qslPrinter(datum)
@@ -506,10 +506,29 @@
 
                 let timeZoneIndicator = document.querySelector("#" + table_id + " .tablecell_timezone");
                 timeZoneIndicator.appendChild(document.createTextNode((isJA && useJST) ? "(JST)" : "(UTC)"));
-                                        
+                
+                let maxQSOsRow = document.getElementById("num_maxRows").value;
+
+                let maxQSOsRowInt = Number.isNaN(maxQSOsRow) ? 10 : Number.parseInt(maxQSOsRow);
+
+
+                let defaultOP = document.getElementById("txt_opDefault").value;
+                let defaultDE = document.getElementById("txt_deDefault").value;
+
 
                 // Fill the Table / 表に書き込む
                 for(let j = 0; j < datum.qsoData.length; j++){
+
+                    if(j + 1 > maxQSOsRowInt){
+                        qslPrinter(
+                            {
+                                callSign: datum.callSign,
+                                qsoData: datum.qsoData.slice(maxQSOsRowInt)
+                            }
+                        )
+                        break;
+                    }
+
                     let qso = datum.qsoData[j];
                     let tableRow = data_table.tBodies[0].insertRow(-1);
 
@@ -544,16 +563,6 @@
                     let deCell = tableRow.insertCell(-1);
                     deCell.className = "qsoDatumCell qsoDatum_de";
                     deCell.appendChild(document.createTextNode(qso.station_callsign || defaultDE || ""));
-
-                    if(j + 2 > maxQSOsRow){
-                        qslPrinter(
-                            {
-                                callSign: datum.callSign,
-                                qsoData: datum.qsoData.slice(maxQSOsRow)
-                            }
-                        )
-                        break;
-                    }
                 }                      
             }
             
