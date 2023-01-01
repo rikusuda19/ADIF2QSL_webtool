@@ -429,7 +429,7 @@
 
                 
                 qslData
-                .sort((d1,d2) => d2.qsoData.length -  d1.qsoData.length)
+                //.sort((d1,d2) => d2.qsoData.length -  d1.qsoData.length)
                 //.filter(data => new RegExp(/^(?:J[A-S]|7[J-N]|8[J-N])/gm).test(data.callSign))
                 .forEach(
                     datum => qslPrinter(datum)
