@@ -7,19 +7,24 @@
 
         <style>
 
+            :root{
+                --card-width: 100mm;
+                --card-height:150mm;
+            }
+
             * {
                 box-sizing: border-box;
                 font-size:9pt;
             }
 
             @page {
-                size: 100mm 148mm;
+                size: var(--card-width) var(--card-height);
                 margin: 0mm;
             }
 
             @media print{
                 body{
-                    width:100mm !important;
+                    width: var(--card-width) !important;
                     margin:0px;
                 }
 
@@ -48,8 +53,8 @@
                 position:relative;
                 top:0mm;
                 left:0mm;
-                width: 100mm;
-                height: 148mm;
+                width: var(--card-width);
+                height: var(--card-height);
                 box-sizing: border-box;
                 padding: 0mm 5mm;
                 page-break-after:always;
@@ -94,8 +99,8 @@
             
             .txt_via{
                 position: absolute;
-                top: 13.5mm;
-                left: 32mm;
+                top: 6mm;
+                right: 55.5mm;
                 width: 5mm;
                 color: red;
                 font-weight:bold;
@@ -105,7 +110,7 @@
                 display: table;
                 position: absolute;
                 top: 11mm;
-                left: 37mm;
+                right: 4mm;
                 border-collapse: separate;
                 border-spacing: 2.5mm 0;
                 padding:0;
@@ -135,7 +140,7 @@
                 height:auto;
                 position:absolute;
                 bottom: 0mm;
-                left: 53.75mm;
+                right: -4.5mm;
             }
 
             .red_bordered{
@@ -153,7 +158,7 @@
 
             .wrapper_to_radio{
                 position:absolute;
-                width: 25mm;
+                width: 22mm;
                 height:13mm;
                 top: 6mm;
                 left: 5mm;
@@ -185,12 +190,12 @@
             .table_qsoData{
                 position:relative;
                 margin: 0 auto;
-                font-size: 9pt;
             }
 
             .table_qsoData td, .table_qsoData th{
                 text-align: center;
                 padding: 0mm 1mm;
+                font-size: 7pt;
             }
 
             .hidden{
@@ -202,14 +207,51 @@
     </head>
 
     <body>
+        <header class="no-print">
+            <h2 style="font-size:large;">
+                ADIF -> QSL Maker
+            </h2>
 
-        <h2 class="no-print" style="font-size:large;">
-            ADIF -> QSL Maker
-        </h2>
+            <p> (c) Riku Suda (JR2KHB). 
+                <ul>
+                    <li>2022-12-20: ver 0.1.0 alpha (first publishing, experimental)</li>
+                    <li>2023-01-01: ver 0.1.1 alpha (experimental)</li>
+                </ul>
+            </p>
+            <p>GitHub repository: <a href="https://github.com/rikusuda19/ADIF2QSL_webtool" target="_blank">https://github.com/rikusuda19/ADIF2QSL_webtool</a>
+        </header>
+        <hr class="no-print">
+        
+        <div class="no-print">
+            <p>
+                <input type="checkbox" checked id="chk_displayOP" onChange="switchOPField();"></input>
+                <label for="chk_displayOP">Display OP column</label>
+                <label for="txt_opDefault" style="margin-left:10px;">Default:</label>
+                <input type="text" id="txt_opDefault" maxlength="20" size="25">
+            </p>
+            <p>
+                <input type="checkbox" checked id="chk_displayDE" onchange="switchDEField();"></input>
+                <label for="chk_displayDE">Display DE column</label>
+                <label for="txt_deDefault" style="margin-left:10px;">Default:</label>
+                <input type="text" id="txt_deDefault" maxlength="20" size="25">
+            </p>
+            <p>
+                <input type="checkbox" checked id="chk_useJSTForJA" checked></input>
+                <label for="chk_useJSTForJA">Use JST (= UTC+9) for JA stations</label>
+            </p>
+            <p>
+                <input id="btn_adifFile" type="file" onChange="btn_adifFile_clicked(this.files)" ></input>
+            </p>
 
-        <p class="no-print"> (c) Riku Suda (JR2KHB). 2022-12-20: first publishing (experimental version)</p>
+            <p>
+                <button id="btn_process" type="button" onclick="btn_adifFile_clicked(document.getElementById('btn_adifFile').files)">Reload</button>
+            </p>
 
-        <p class="no-print"><input type="file" multiple onChange="parse_adi(this.files[0])"></input></p>
+            <p id="txt_status">
+                Choose an ADIF File.
+            </p>
+
+        </div>
 
         <hr>
 
@@ -264,14 +306,15 @@
                         <div class="statement" style="text-align:center; font-weight:bold; font-size:12pt; margin-bottom: 3mm;">Confirming our QSO</div>
                         <table class="table_qsoData" id="table_qsoData_template">
                             <thead>
-                            <tr>
-                            <th>DATE</th>
-                            <th>TIME</th>
-                            <th>FREQ</th>
-                            <th>MODE</th>
-                            <th>RST</th>
-                            <th>OP</th>
-                            </tr>
+                                <tr>
+                                    <th class="qsoHeaderCell qsoHeader_date">DATE</th>
+                                    <th class="qsoHeaderCell qsoHeader_time">TIME</th>
+                                    <th class="qsoHeaderCell qsoHeader_freq">FREQ</th>
+                                    <th class="qsoHeaderCell qsoHeader_mode">MODE</th>
+                                    <th class="qsoHeaderCell qsoHeader_report">RST</th>
+                                    <th class="qsoHeaderCell qsoHeader_op">OP</th>
+                                    <th class="qsoHeaderCell qsoHeader_de">DE</th>
+                                </tr>
                             </thead>
                             <tbody>
                             </tbody>
@@ -279,6 +322,8 @@
                                 <tr>
                                     <td></td>
                                     <td class="tablecell_timezone" id="tablecell_timezone_template"></td>
+                                    <td></td>
+                                    <td></td>
                                     <td></td>
                                     <td></td>
                                     <td></td>
@@ -295,29 +340,82 @@
             const doc_body = document.getElementById("qsl_area");
             const qsl_template = document.getElementById("qsl_template");
 
-            function parse_adi(file){
+            const statusTextArea = document.getElementById("txt_status");
 
-                doc_body.innerHTML = "";
+            const defaultOP = document.getElementById("txt_opDefault").value;
+            const defaultDE = document.getElementById("txt_deDefault").value;
+
+            const maxQSOsRow = 5;
+
+            let cardCounter;
+
+            const repaint = async () => {
+                for (let i = 0; i < 2; i++) {
+                    await new Promise(resolve => requestAnimationFrame(resolve));
+                }
+            };
+
+            // This idea for repainting is from 
+            // https://qiita.com/kerupani129/items/3d26fef39e0e44101aad
+
+            const btn_adifFile_clicked =
+                async (files) => 
+                {
+                    doc_body.innerHTML = "";
+                    cardCounter = 0;
+                    statusTextArea.textContent = "Processing...";
+
+                    await repaint();
+                    Array.from(files).forEach(
+                        file => 
+                        readFile(file, 
+                            (
+                                s => {
+                                    display_QSO_data(parse_adi(s));
+                                    statusTextArea.textContent = cardCounter + " QSL card" + (cardCounter > 1 ? "s have" : " has") + " been produced."
+                                }
+                            ),
+                            (
+                                () => {
+                                    statusTextArea.textContent = "FILE ERROR!"
+                                }
+                            )
+                        )
+                    );
+                    await repaint();
+                    if(!cardCounter){
+                        statusTextArea.innerText = "Choose an ADIF file."
+                    }
+                }
+
+            function readFile(file, callback_success, callback_fail){
 
                 let file_reader = new FileReader();
 
+
+                file_reader.onload = function(event){
+                    callback_success(event.target.result);
+                };
+
+                file_reader.onerror = function(event){
+                    callback_fail();
+                };
+
                 file_reader.readAsText(file);
                 
-                file_reader.onload = function(event){
-                    let adi = event.target.result;
-                    //doc_body.innerText += adi;
+            }
 
-                    let ap = new AdifParser(adi);
-                    //doc_body.innerText = JSON.stringify(ap.parseTopLevel());
-
-                    display_QSO_data(ap.parseTopLevel());
-                }
+            function parse_adi(adifStr){
+                let ap = new AdifParser(adifStr);
+                return ap.parseTopLevel();
             }
 
             function display_QSO_data(adifObj){
-                let records = adifObj.records;
+                let records = adifObj?.records;
 
-                let callList = Array.from(new Set(records.map(elm => elm.call).sort())).filter(elm => (elm));
+                let callList = Array.from(new Set(records?.map(elm => elm.call).sort())).filter(elm => (elm));
+
+                if(!callList){return;}
                 
                 let qslData = 
                     callList.map(
@@ -331,110 +429,134 @@
 
                 
                 qslData
-                // .sort((d1,d2) => d2.qsoData.length -  d1.qsoData.length)
-                //.filter(data => new RegExp(/^(?:J[A-S]|7[J-N]|8[J-N])/gm).test(datum.callSign))
+                //.sort((d1,d2) => d2.qsoData.length -  d1.qsoData.length)
+                //.filter(data => new RegExp(/^(?:J[A-S]|7[J-N]|8[J-N])/gm).test(data.callSign))
                 .forEach(
-                    datum => {
-                        let isJA = new RegExp(/^(?:J[A-S]|7[J-N]|8[J-N])/gm).test(datum.callSign);
-                        let safeCallSign = datum.callSign?.replace("/","-");
-
-                        // 1ページ作る
-                        let qsl_page = qsl_template.cloneNode(true);
-                        qsl_page.id = "qsl_" + safeCallSign;
-                        
-
-                        // ページを設置
-                        doc_body.appendChild(qsl_page);
-
-                        // id を変更
-                        qsl_page.querySelectorAll("*").forEach(item => {
-                            if(item.id){
-                                item.id = item.id.replace("template", safeCallSign);
-                            }
-
-                            if(item.getAttribute("for")){
-                                item.setAttribute("for", item.getAttribute("for").replace("template", safeCallSign));
-                            }
-                        });
-
-                        //to Radio を記入
-                        let txt_to_radio = qsl_page.querySelector(".box_to_radio");
-
-                        txt_to_radio.appendChild(document.createTextNode(datum.callSign));
-                        
-
-                        // 転送枠
-                        let callSignBoxes_for_bureau_wrapper = qsl_page.querySelector(".table_bureau_call");
-                        let callSignBoxes_for_bureau = callSignBoxes_for_bureau_wrapper.querySelectorAll("tbody td");
-                        let callSignForBureau = JACallSignSplitter(datum.callSign);
-
-                        let isJARLStyleCheckbox = qsl_page.querySelector("#chk_JARLStyleFrame_" + safeCallSign);
-
-                        let callSignTextBox = qsl_page.querySelector("#txt_qslto_callsign_" + safeCallSign);
-
-                        if(isJA){
-                            isJARLStyleCheckbox.checked = true;
-                            callSignTextBox.value = callSignForBureau;
-                        }
-                        else{
-                            isJARLStyleCheckbox.checked = false;
-                            callSignTextBox.value = "";
-                        }
-
-                        qslTo_redraw(qsl_page.id);
-
-
-                        // QSO / QSOs
-                        if(datum.qsoData.length > 1){
-                            document.querySelector("#" + qsl_page.id + " .statement").innerText += "s";
-                        }
-
-
-                        // 表を作る
-                        let data_table = document.querySelector("#" + qsl_page.id + " .table_qsoData");
-                        let table_id = data_table.id;
-
-                        let timeZoneIndicator = document.querySelector("#" + table_id + " .tablecell_timezone");
-                        timeZoneIndicator.appendChild(document.createTextNode(isJA ? "(JST)" : "(UTC)"))
-                                               
-
-                        // 表に書き込む
-                        datum.qsoData.forEach(qso => {
-                                let tableRow = data_table.tBodies[0].insertRow(-1);
-
-                                let qsoDateTime = date_time_converter(qso.qso_date, qso.time_on || qso.time_off);
-
-                                qsoDateTime = isJA ? qsoDateTime.tz("Asia/Tokyo") : qsoDateTime;
-
-                                let dateCell = tableRow.insertCell(-1);
-                                dateCell.className = "qsoDatumCell qsoDatum_date";
-                                dateCell.appendChild(document.createTextNode(qsoDateTime.format("YYYY-MM-DD")));
-
-                                let timeCell = tableRow.insertCell(-1);
-                                timeCell.className = "qsoDatumCell qsoDatum_time";
-                                timeCell.appendChild(document.createTextNode(qsoDateTime.format("HH:mm")));
-
-                                let bandCell = tableRow.insertCell(-1);
-                                bandCell.className = "qsoDatumCell qsoDatum_band";
-                                bandCell.appendChild(document.createTextNode(qso.freq || qso.band));
-
-                                let modeCell = tableRow.insertCell(-1);
-                                modeCell.className = "qsoDatumCell qsoDatum_mode";
-                                modeCell.appendChild(document.createTextNode(qso.mode));
-
-                                let reportCell = tableRow.insertCell(-1);
-                                reportCell.className = "qsoDatumCell qsoDatum_report";
-                                reportCell.appendChild(document.createTextNode(qso.rst_sent));
-
-                                let opCell = tableRow.insertCell(-1);
-                                opCell.className = "qsoDatumCell qsoDatum_op";
-                                opCell.appendChild(document.createTextNode(qso.operator || qso.station_callsign || ""));
-
-                            }
-                        )                      
-                    }
+                    datum => qslPrinter(datum)
                 )
             }
+
+            // datum is like  {callSign: "***", qsoData: [...]}
+            function qslPrinter(datum){
+                cardCounter++;
+
+                let isJA = new RegExp(/^(?:J[A-S]|7[J-N]|8[J-N])/gm).test(datum.callSign);
+                let useJST = document.getElementById("chk_useJSTForJA")?.checked;
+                let safeCallSign = datum.callSign?.replace("/","-");
+
+                let qslID = cardCounter + "_" + safeCallSign
+
+                // Create a page / 1ページ作る
+                let qsl_page = qsl_template.cloneNode(true);
+                qsl_page.id = "qsl_" +  qslID;
+                
+
+                // Place the page / ページを設置
+                doc_body.appendChild(qsl_page);
+
+                // Change id for elements / IDを変更
+                qsl_page.querySelectorAll("*").forEach(item => {
+                    if(item.id){
+                        item.id = item.id.replace("template", qslID);
+                    }
+
+                    if(item.getAttribute("for")){
+                        item.setAttribute("for", item.getAttribute("for").replace("template", qslID));
+                    }
+                });
+
+                // Fill the "To Radio" / "To Radio" を記入
+                let txt_to_radio = qsl_page.querySelector(".box_to_radio");
+
+                txt_to_radio.appendChild(document.createTextNode(datum.callSign));
+                
+
+                // Fill the JARL Bureau Frame / 転送枠
+                let callSignBoxes_for_bureau_wrapper = qsl_page.querySelector(".table_bureau_call");
+                let callSignBoxes_for_bureau = callSignBoxes_for_bureau_wrapper.querySelectorAll("tbody td");
+                let callSignForBureau = JACallSignSplitter(datum.callSign);
+
+                let isJARLStyleCheckbox = qsl_page.querySelector("#chk_JARLStyleFrame_" + qslID);
+
+                let callSignTextBox = qsl_page.querySelector("#txt_qslto_callsign_" + qslID);
+
+                qsl_page.querySelector("#chk_via_" + qslID).checked = false;
+
+                if(isJA){
+                    isJARLStyleCheckbox.checked = true;
+                    callSignTextBox.value = callSignForBureau;
+                }
+                else{
+                    isJARLStyleCheckbox.checked = false;
+                    callSignTextBox.value = "";
+                }
+
+                qslTo_redraw(qsl_page.id);
+
+
+                // Switch "QSO" or "QSOs"
+                if(datum.qsoData.length > 1){
+                    document.querySelector("#" + qsl_page.id + " .statement").innerText += "s";
+                }
+
+
+                // Create a Table for QSO Data / 表を作る
+                let data_table = document.querySelector("#" + qsl_page.id + " .table_qsoData");
+                let table_id = data_table.id;
+
+                let timeZoneIndicator = document.querySelector("#" + table_id + " .tablecell_timezone");
+                timeZoneIndicator.appendChild(document.createTextNode((isJA && useJST) ? "(JST)" : "(UTC)"));
+                                        
+
+                // Fill the Table / 表に書き込む
+                for(let j = 0; j < datum.qsoData.length; j++){
+                    let qso = datum.qsoData[j];
+                    let tableRow = data_table.tBodies[0].insertRow(-1);
+
+                    let qsoDateTime = date_time_converter(qso.qso_date, qso.time_on || qso.time_off);
+
+                    qsoDateTime = (isJA && useJST) ? qsoDateTime.tz("Asia/Tokyo") : qsoDateTime;
+
+                    let dateCell = tableRow.insertCell(-1);
+                    dateCell.className = "qsoDatumCell qsoDatum_date";
+                    dateCell.appendChild(document.createTextNode(qsoDateTime.format("YYYY-MM-DD")));
+
+                    let timeCell = tableRow.insertCell(-1);
+                    timeCell.className = "qsoDatumCell qsoDatum_time";
+                    timeCell.appendChild(document.createTextNode(qsoDateTime.format("HH:mm")));
+
+                    let bandCell = tableRow.insertCell(-1);
+                    bandCell.className = "qsoDatumCell qsoDatum_band";
+                    bandCell.appendChild(document.createTextNode( !isNaN(qso.freq) ? parseFloat(qso.freq).toFixed(3) : qso.band));
+
+                    let modeCell = tableRow.insertCell(-1);
+                    modeCell.className = "qsoDatumCell qsoDatum_mode";
+                    modeCell.appendChild(document.createTextNode(qso.mode));
+
+                    let reportCell = tableRow.insertCell(-1);
+                    reportCell.className = "qsoDatumCell qsoDatum_report";
+                    reportCell.appendChild(document.createTextNode(qso.rst_sent));
+
+                    let opCell = tableRow.insertCell(-1);
+                    opCell.className = "qsoDatumCell qsoDatum_op";
+                    opCell.appendChild(document.createTextNode(qso.operator || defaultOP || ""));
+
+                    let deCell = tableRow.insertCell(-1);
+                    deCell.className = "qsoDatumCell qsoDatum_de";
+                    deCell.appendChild(document.createTextNode(qso.station_callsign || defaultDE || ""));
+
+                    if(j + 2 > maxQSOsRow){
+                        qslPrinter(
+                            {
+                                callSign: datum.callSign,
+                                qsoData: datum.qsoData.slice(maxQSOsRow)
+                            }
+                        )
+                        break;
+                    }
+                }                      
+            }
+            
         
             function date_time_converter(dateExp, timeExp = "0000"){
                 if(dateExp?.length != 8 || (timeExp?.length != 4 && timeExp?.length != 6)){
@@ -529,6 +651,43 @@
                             break;
                         }
                         
+                }
+
+            }
+
+            function switchOPField(){
+                let chkDisplayOP = document.querySelector("#chk_displayOP");
+                let chkStatus = chkDisplayOP.checked;
+
+                let opFields = document.querySelectorAll(".qsoDatum_op");
+                let opHeader = document.querySelector(".qsoHeader_op");
+
+
+                if(chkStatus){
+                    opFields.forEach(f => f.classList.remove("hidden"));
+                    opHeader.classList.remove("hidden");                   
+                }
+                else{
+                    opFields.forEach(f => f.classList.add("hidden"));
+                    opHeader.classList.add("hidden");                   
+                }
+            }
+
+            function switchDEField(){
+                let chkDisplayDE = document.querySelector("#chk_displayDE");
+                let chkStatus = chkDisplayDE.checked;
+
+                let deFields = document.querySelectorAll(".qsoDatum_de");
+                let deHeader = document.querySelector(".qsoHeader_de");
+
+
+                if(chkStatus){
+                    deFields.forEach(f => f.classList.remove("hidden"));
+                    deHeader.classList.remove("hidden");                   
+                }
+                else{
+                    deFields.forEach(f => f.classList.add("hidden"));
+                    deHeader.classList.add("hidden");                   
                 }
             }
 
