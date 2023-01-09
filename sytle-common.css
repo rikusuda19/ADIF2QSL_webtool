@@ -170,3 +170,13 @@
     white-space:nowrap;
 }
 
+.table_qsoData td.qslMsg{
+    margin-bottom:0.5mm;
+    text-align:right;
+    white-space:normal;
+}
+
+.info_area{
+    position:relative;
+    margin: 0 auto;
+}

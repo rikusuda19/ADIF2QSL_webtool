@@ -28,7 +28,7 @@
         <div class="no-print">
             <p>
 
-                <label for="list_cardSize">選択してください</label>
+                <label for="list_cardSize">Card Size: </label>
                 <select id="list_cardSize" onchange="cssSelector(this.value)">
                     <option value="ja-card" selected>JA card size (100mm * 150mm)</option>
                     <option value="intl-card">International card size (90mm * 140mm)</option>
@@ -124,6 +124,15 @@
                         <table class="table_qsoData" id="table_qsoData_template">
                             <thead>
                                 <tr>
+                                    <td></td>
+                                    <td class="tablecell_timezone" id="tablecell_timezone_template"></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
                                     <th class="qsoHeaderCell qsoHeader_date">DATE</th>
                                     <th class="qsoHeaderCell qsoHeader_time">TIME</th>
                                     <th class="qsoHeaderCell qsoHeader_freq">FREQ</th>
@@ -136,18 +145,15 @@
                             <tbody>
                             </tbody>
                             <tfoot>
-                                <tr>
-                                    <td></td>
-                                    <td class="tablecell_timezone" id="tablecell_timezone_template"></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                </tr>
+
                             </tfoot>
                         </table>
                     </div>
+
+                    <div class="info_area">
+                        <div></div>
+                    </div>
+
                 </div>
             </section>
 
@@ -317,6 +323,7 @@
                 let data_table = document.querySelector("#" + qsl_page.id + " .table_qsoData");
                 let table_id = data_table.id;
 
+
                 let timeZoneIndicator = document.querySelector("#" + table_id + " .tablecell_timezone");
                 timeZoneIndicator.appendChild(document.createTextNode((isJA && useJST) ? "(JST)" : "(UTC)"));
                 
@@ -376,6 +383,16 @@
                     let deCell = tableRow.insertCell(-1);
                     deCell.className = "qsoDatumCell qsoDatum_de";
                     deCell.appendChild(document.createTextNode(qso.station_callsign || defaultDE || ""));
+
+                    let qslMessage = (qso.qslmsgintl || "") + (qso.qslmsg || "");
+                    
+                    if(qslMessage.trim()!=""){
+                        let msgRow = data_table.tBodies[0].insertRow(-1);
+                        let msgCell = msgRow.insertCell(-1);
+                        msgCell.setAttribute("colspan", 7);
+                        msgCell.className="qslMsg";
+                        msgCell.appendChild(document.createTextNode("(" + qslMessage.trim() + ")"));
+                    }
                 }                      
             }
             
@@ -482,16 +499,16 @@
                 let chkStatus = chkDisplayOP.checked;
 
                 let opFields = document.querySelectorAll(".qsoDatum_op");
-                let opHeader = document.querySelector(".qsoHeader_op");
+                let opHeaders = document.querySelectorAll(".qsoHeader_op");
 
 
                 if(chkStatus){
                     opFields.forEach(f => f.classList.remove("hidden"));
-                    opHeader.classList.remove("hidden");                   
+                    opHeaders.forEach(f => f.classList.remove("hidden"));
                 }
                 else{
                     opFields.forEach(f => f.classList.add("hidden"));
-                    opHeader.classList.add("hidden");                   
+                    opHeaders.forEach(f => f.classList.add("hidden"));
                 }
             }
 
@@ -500,16 +517,16 @@
                 let chkStatus = chkDisplayDE.checked;
 
                 let deFields = document.querySelectorAll(".qsoDatum_de");
-                let deHeader = document.querySelector(".qsoHeader_de");
+                let deHeaders = document.querySelectorAll(".qsoHeader_de");
 
 
                 if(chkStatus){
                     deFields.forEach(f => f.classList.remove("hidden"));
-                    deHeader.classList.remove("hidden");                   
+                    deHeaders.forEach(f => f.classList.remove("hidden"));
                 }
                 else{
                     deFields.forEach(f => f.classList.add("hidden"));
-                    deHeader.classList.add("hidden");                   
+                    deHeaders.forEach(f => f.classList.add("hidden"));
                 }
             }
 
