@@ -1,0 +1,52 @@
+
+:root {
+    --card-width: 90mm;
+    --card-height:140mm;
+}
+
+* {
+    font-size:9pt;
+}
+
+#qsl_area{
+    display:flex;
+    flex-wrap: wrap;
+}
+
+.page{
+    width: var(--card-width);
+    height: auto;
+    min-height: 40mm;
+}
+
+
+@page {
+    size: A4 portrait;
+    margin: 5mm;
+}
+
+@media print{
+    body{
+        width: 210mm;
+        margin: 5mm ;
+    }
+
+    hr, .no-print{
+        display: none;
+    }
+
+    .page{
+        display:inline-block;
+        background-color: white;
+        border-width: 1px; 
+        border-style: dashed dashed none none;
+        border-color: #666666;
+        margin: 0px;
+    }
+}
+
+.table_qsoData td, .table_qsoData th{
+    padding: 0mm 0.5mm;
+    font-size: 6pt;
+}
+

@@ -8,6 +8,12 @@
     font-size:9pt;
 }
 
+.page{
+    width: var(--card-width);
+    height: var(--card-height);
+}
+
+
 @page {
     size: 90mm 140mm;
     margin: 0mm;

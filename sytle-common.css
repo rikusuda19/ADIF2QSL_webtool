@@ -8,7 +8,8 @@
 }
 
 #qsl_area{
-    display:grid;
+    /* display:grid; */
+    display:block;
 }
 
 
@@ -26,15 +27,13 @@
     position:relative;
     top:0mm;
     left:0mm;
-    width: var(--card-width);
-    height: var(--card-height);
     box-sizing: border-box;
     padding: 0mm 5mm;
     page-break-after:always;
     break-after:always;
     page-break-inside:avoid;
     break-inside:avoid;
-    display:block;
+    display:inline-block;
     border:0px;
     margin:0mm;
 }
@@ -154,10 +153,16 @@
 }
 
 .data_area{
-    position:absolute;
-    top: 25mm;
-    left:0mm;
+    position:static;
+    margin: 24mm auto 5mm ;
     width: 100%;
+}
+
+.statement{
+    text-align:center; 
+    font-weight:bold; 
+    font-size:12pt; 
+    margin-bottom: 0mm;
 }
 
 .table_qsoData{
@@ -177,6 +182,6 @@
 }
 
 .info_area{
-    position:relative;
+    position:static;
     margin: 0 auto;
 }

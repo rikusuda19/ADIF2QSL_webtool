@@ -5,7 +5,7 @@
         <script src="./moment.js"></script>
         <script src="./moment-timezone.js"></script>
         <link rel="stylesheet" type="text/css" href="sytle-common.css" id="css-common">
-        <link rel="stylesheet" type="text/css" href="style-ja-card.css" id="css-cardsize">
+        <link rel="stylesheet" type="text/css" href="style-intl-card.css" id="css-cardsize">
     </head>
 
     <body>
@@ -30,8 +30,9 @@
 
                 <label for="list_cardSize">Card Size: </label>
                 <select id="list_cardSize" onchange="cssSelector(this.value)">
-                    <option value="ja-card" selected>JA card size (100mm * 150mm)</option>
-                    <option value="intl-card">International card size (90mm * 140mm)</option>
+                    <option value="intl-card" selected>International card size (90mm * 140mm)</option>
+                    <option value="ja-card">JA card size (100mm * 150mm)</option>
+                    <option value="sticker">Sticker (A$ Portrait)</option>
                 </select>
             </p>
             
@@ -73,7 +74,7 @@
         <hr>
 
         <div id="qsl_area">
-            <section id="qsl_template">
+            <section class="qsl_section" id="qsl_template">
                 <div id="qsl_control_template" class="no-print qsl_control">
                     
                     <div style="margin-right:2mm; display:inline-block;">
@@ -118,9 +119,8 @@
                         </tbody>
                     </table>
 
-
                     <div class="data_area">
-                        <div class="statement" style="text-align:center; font-weight:bold; font-size:12pt; margin-bottom: 3mm;">Confirming our QSO</div>
+                        <div class="statement">Confirming our QSO</div>
                         <table class="table_qsoData" id="table_qsoData_template">
                             <thead>
                                 <tr>
@@ -540,7 +540,11 @@
                         break;
                     
                     case "intl-card":
-                    elm.href="style-intl-card.css";
+                        elm.href="style-intl-card.css";
+                        break;
+
+                    case "sticker":
+                        elm.href="style-sticker.css";
                         break;
 
                     default:
