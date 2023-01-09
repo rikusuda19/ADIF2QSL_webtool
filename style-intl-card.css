@@ -1,0 +1,31 @@
+
+:root {
+    --card-width: 90mm;
+    --card-height:140mm;
+}
+
+* {
+    font-size:9pt;
+}
+
+@page {
+    size: 90mm 140mm;
+    margin: 0mm;
+}
+
+@media print{
+    body{
+        width: var(--card-width) !important;
+        margin:0px;
+    }
+
+    hr, .no-print{
+        display: none;
+    }
+}
+
+.table_qsoData td, .table_qsoData th{
+    padding: 0mm 0.5mm;
+    font-size: 6pt;
+}
+

@@ -1,0 +1,172 @@
+* {
+    box-sizing: border-box;
+}
+
+
+.hidden{
+    display:none; 
+}
+
+#qsl_area{
+    display:grid;
+}
+
+
+.qsl_control{
+    text-align:center;
+    vertical-align: middle;
+}
+
+.qsl_control>div{
+    display:inline-block;
+}
+
+
+.page{
+    position:relative;
+    top:0mm;
+    left:0mm;
+    width: var(--card-width);
+    height: var(--card-height);
+    box-sizing: border-box;
+    padding: 0mm 5mm;
+    page-break-after:always;
+    break-after:always;
+    page-break-inside:avoid;
+    break-inside:avoid;
+    display:block;
+    border:0px;
+    margin:0mm;
+}
+
+
+.page:last-child{
+    page-break-after: auto;
+}
+
+
+
+
+@media screen{
+
+    
+    #qsl_area{
+        display:flex;
+        flex-wrap: wrap;
+        min-width: 120mm;
+    }
+    
+
+    .page{
+        display:inline-block;
+        background-color: white;
+        border: 1px solid #666666;
+        margin: 10px;
+    }
+
+    section{
+        margin:20px;
+    }
+
+}
+
+.txt_via{
+    position: absolute;
+    top: 6mm;
+    right: 55.5mm;
+    width: 5mm;
+    color: red;
+    font-weight:bold;
+}
+
+.table_bureau_call{
+    display: table;
+    position: absolute;
+    top: 11mm;
+    right: 4mm;
+    border-collapse: separate;
+    border-spacing: 2.5mm 0;
+    padding:0;
+    table-layout: fixed;
+}
+
+.table_bureau_call tbody td{
+    display: table-cell;
+    vertical-align: bottom;
+    width:6.5mm;
+    height:9mm;
+    font-size: 6mm;
+    line-height:6mm;
+    padding:0 0 1mm 0;
+    text-align:center;
+    font-weight: bold;
+}
+
+.table_bureau_call tbody td:last-child{
+    border:none;
+    display: table-cell;
+    vertical-align: bottom;
+    font-size: 3mm;
+    line-height: 3mm;
+    text-align:left;
+    width: 9mm;
+    height:auto;
+    position:absolute;
+    bottom: 0mm;
+    right: -4.5mm;
+}
+
+.red_bordered{
+    border: 1px solid red;
+}
+
+.dot_bordered{
+    border:1px dotted black;
+}
+
+.bottom_bordered{
+    border: none;
+    border-bottom: 1px solid black;
+}
+
+.wrapper_to_radio{
+    position:absolute;
+    width: 22mm;
+    height:13mm;
+    top: 6mm;
+    left: 5mm;
+    border-collapse: collapse;
+}
+
+.wrapper_to_radio th{
+    height: 4mm;
+    text-align:left;
+    font-weight: normal;
+}
+
+.box_to_radio{
+    height: 9mm;
+    text-align:center;
+    vertical-align: bottom;
+    border-bottom: 1px solid black;
+    padding :1mm ;
+    font-weight:bold;
+}
+
+.data_area{
+    position:absolute;
+    top: 25mm;
+    left:0mm;
+    width: 100%;
+}
+
+.table_qsoData{
+    position:relative;
+    margin: 0 auto;
+}
+
+.table_qsoData td, .table_qsoData th{
+    text-align: center;
+    white-space:nowrap;
+}
+

@@ -4,206 +4,8 @@
         <script src="./adif_parser.js"></script>
         <script src="./moment.js"></script>
         <script src="./moment-timezone.js"></script>
-
-        <style>
-
-            :root {
-                --card-width: 100mm;
-                --card-height:150mm;
-            }
-
-            * {
-                box-sizing: border-box;
-                font-size:9pt;
-            }
-
-            @page {
-                size: 100mm 150mm;
-                margin: 0mm;
-            }
-
-            @media print{
-                body{
-                    width: var(--card-width) !important;
-                    margin:0px;
-                }
-
-                hr, .no-print{
-                    display: none;
-                }
-            }
-
-
-            #qsl_area{
-                display:grid;
-            }
-
-
-            .qsl_control{
-                text-align:center;
-                vertical-align: middle;
-            }
-
-            .qsl_control>div{
-                display:inline-block;
-            }
-
-
-            .page{
-                position:relative;
-                top:0mm;
-                left:0mm;
-                width: var(--card-width);
-                height: var(--card-height);
-                box-sizing: border-box;
-                padding: 0mm 5mm;
-                page-break-after:always;
-                break-after:always;
-                page-break-inside:avoid;
-                break-inside:avoid;
-                display:block;
-                border:0px;
-                margin:0mm;
-            }
-
-            
-            .page:last-child{
-                page-break-after: auto;
-            }
-            
-
-            
-
-            @media screen{
-
-                
-                #qsl_area{
-                    display:flex;
-                    flex-wrap: wrap;
-                    min-width: 120mm;
-                }
-                
-
-                .page{
-                    display:inline-block;
-                    background-color: white;
-                    border: 1px solid #666666;
-                    margin: 10px;
-                }
-
-                section{
-                    margin:20px;
-                }
-
-            }
-            
-            .txt_via{
-                position: absolute;
-                top: 6mm;
-                right: 55.5mm;
-                width: 5mm;
-                color: red;
-                font-weight:bold;
-            }
-
-            .table_bureau_call{
-                display: table;
-                position: absolute;
-                top: 11mm;
-                right: 4mm;
-                border-collapse: separate;
-                border-spacing: 2.5mm 0;
-                padding:0;
-                table-layout: fixed;
-            }
-
-            .table_bureau_call tbody td{
-                display: table-cell;
-                vertical-align: bottom;
-                width:6.5mm;
-                height:9mm;
-                font-size: 6mm;
-                line-height:6mm;
-                padding:0 0 1mm 0;
-                text-align:center;
-                font-weight: bold;
-            }
-
-            .table_bureau_call tbody td:last-child{
-                border:none;
-                display: table-cell;
-                vertical-align: bottom;
-                font-size: 3mm;
-                line-height: 3mm;
-                text-align:left;
-                width: 9mm;
-                height:auto;
-                position:absolute;
-                bottom: 0mm;
-                right: -4.5mm;
-            }
-
-            .red_bordered{
-                border: 1px solid red;
-            }
-
-            .dot_bordered{
-                border:1px dotted black;
-            }
-
-            .bottom_bordered{
-                border: none;
-                border-bottom: 1px solid black;
-            }
-
-            .wrapper_to_radio{
-                position:absolute;
-                width: 22mm;
-                height:13mm;
-                top: 6mm;
-                left: 5mm;
-                border-collapse: collapse;
-            }
-
-            .wrapper_to_radio th{
-                height: 4mm;
-                text-align:left;
-                font-weight: normal;
-            }
-
-            .box_to_radio{
-                height: 9mm;
-                text-align:center;
-                vertical-align: bottom;
-                border-bottom: 1px solid black;
-                padding :1mm ;
-                font-weight:bold;
-            }
-
-            .data_area{
-                position:absolute;
-                top: 25mm;
-                left:0mm;
-                width: 100%;
-            }
-
-            .table_qsoData{
-                position:relative;
-                margin: 0 auto;
-            }
-
-            .table_qsoData td, .table_qsoData th{
-                text-align: center;
-                padding: 0mm 1mm;
-                font-size: 7pt;
-            }
-
-            .hidden{
-                display:none; 
-            }
-        </style>
-
-
+        <link rel="stylesheet" type="text/css" href="sytle-common.css" id="css-common">
+        <link rel="stylesheet" type="text/css" href="style-ja-card.css" id="css-cardsize">
     </head>
 
     <body>
@@ -218,17 +20,28 @@
                     <li>2023-01-01: ver 0.1.1 alpha (experimental)</li>
                 </ul>
             </p>
-            <p>GitHub repository: <a href="https://github.com/rikusuda19/ADIF2QSL_webtool" target="_blank">https://github.com/rikusuda19/ADIF2QSL_webtool</a>
+            <p>GitHub repository: <a href="https://github.com/rikusuda19/ADIF2QSL_webtool" target="_blank">https://github.com/rikusuda19/ADIF2QSL_webtool</a>                
         </header>
+
         <hr class="no-print">
         
         <div class="no-print">
+            <p>
+
+                <label for="list_cardSize">選択してください</label>
+                <select id="list_cardSize" onchange="cssSelector(this.value)">
+                    <option value="ja-card" selected>JA card size (100mm * 150mm)</option>
+                    <option value="intl-card">International card size (90mm * 140mm)</option>
+                </select>
+            </p>
+            
             <p>
                 <input type="checkbox" checked id="chk_displayOP" onChange="switchOPField();"></input>
                 <label for="chk_displayOP">Display OP column</label>
                 <label for="txt_opDefault" style="margin-left:10px;">Default:</label>
                 <input type="text" id="txt_opDefault" maxlength="20" size="25">
             </p>
+
             <p>
                 <input type="checkbox" checked id="chk_displayDE" onchange="switchDEField();"></input>
                 <label for="chk_displayDE">Display DE column</label>
@@ -697,6 +510,24 @@
                 else{
                     deFields.forEach(f => f.classList.add("hidden"));
                     deHeader.classList.add("hidden");                   
+                }
+            }
+
+            function cssSelector(value){
+
+                let elm = document.getElementById("css-cardsize");
+
+                switch (value) {
+                    case "ja-card":
+                        elm.href="style-ja-card.css";
+                        break;
+                    
+                    case "intl-card":
+                    elm.href="style-intl-card.css";
+                        break;
+
+                    default:
+                        break;
                 }
             }
 
