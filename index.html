@@ -4,11 +4,15 @@
         <script src="./adif_parser.js"></script>
         <script src="./moment.js"></script>
         <script src="./moment-timezone.js"></script>
-        <link rel="stylesheet" type="text/css" href="sytle-common.css" id="css-common">
+        <script type="text/javascript">
+            var modified = new Date();
+            var str = modified.toISOString();
+            document.write('<link href="./sytle-common.css?t=' + str + '" rel="stylesheet" type="text/css">');
+        </script>
         <link rel="stylesheet" type="text/css" href="style-intl-card.css" id="css-cardsize">
     </head>
 
-    <body>
+    <body onload="cssSelector('intl-card')">
         <header class="no-print">
             <h2 style="font-size:large;">
                 ADIF -> QSL Maker
@@ -534,18 +538,20 @@
             function cssSelector(value){
 
                 let elm = document.getElementById("css-cardsize");
+                let modified = new Date();
+                let str = modified.toISOString();
 
                 switch (value) {
                     case "ja-card":
-                        elm.href="style-ja-card.css";
+                        elm.href="style-ja-card.css?t=" + str;
                         break;
                     
                     case "intl-card":
-                        elm.href="style-intl-card.css";
+                        elm.href="style-intl-card.css?t=" + str;
                         break;
 
                     case "sticker":
-                        elm.href="style-sticker.css";
+                        elm.href="style-sticker.css?t=" + str;
                         break;
 
                     default:
