@@ -5,8 +5,8 @@
         <script src="./moment.js"></script>
         <script src="./moment-timezone.js"></script>
         <script type="text/javascript">
-            var modified = new Date();
-            var str = modified.toISOString();
+            let modified = new Date();
+            let str = modified.toISOString();
             document.write('<link href="./sytle-common.css?t=' + str + '" rel="stylesheet" type="text/css">');
         </script>
         <link rel="stylesheet" type="text/css" href="style-intl-card.css" id="css-cardsize">
@@ -62,12 +62,19 @@
                 <label for="num_maxRows">Max number of QSO data per card:</label>
                 <input type="number" id="num_maxRows" min="1" max="100" value="10">
             </p>
+
             <p>
-                <input id="btn_adifFile" type="file" onChange="btn_adifFile_clicked(this.files)" ></input>
+                <label for="btn_imgFile">QSL Logo</label>
+                <input id="btn_imgFile" type="file" accept="image/*" onChange="btn_imgFile_clicked(this.files)" ></input>
             </p>
 
             <p>
-                <button id="btn_process" type="button" onclick="btn_adifFile_clicked(document.getElementById('btn_adifFile').files)">Reload</button>
+                <label for="btn_adifFile">ADIF File</label>
+                <input id="btn_adifFile" type="file" accept=".adi, .txt" onChange="btn_adifFile_clicked(this.files)" ></input>
+            </p>
+
+            <p>
+                <button id="btn_process" type="button" onclick="btn_adifFile_clicked(document.getElementById('btn_adifFile').files);">Reload</button>
             </p>
 
             <p id="txt_status">
@@ -156,7 +163,7 @@
                     </div>
 
                     <div class="info_area">
-                        <div></div>
+                        <img class="qslImage" />
                     </div>
 
                 </div>
@@ -170,6 +177,7 @@
 
             const statusTextArea = document.getElementById("txt_status");
 
+            let qslImage;
 
             let cardCounter;
 
@@ -212,6 +220,34 @@
                     }
                 }
 
+
+            const btn_imgFile_clicked = 
+                async (files) => 
+                {
+                    await repaint();
+                    Array.from(files).forEach(
+                        file => 
+                        readImage(file, 
+                            (
+                                s => {
+                                    qslImage = s;
+                                }
+                            ),
+                            (
+                                () => {
+                                    qslImage = "";
+                                }
+                            )
+                        )
+                    );
+                    await repaint();
+                    document.querySelectorAll("img.qslImage").forEach(
+                        elm => elm.setAttribute("src", qslImage)
+                    );
+                }
+
+
+
             function readFile(file, callback_success, callback_fail){
 
                 let file_reader = new FileReader();
@@ -229,7 +265,23 @@
                 
             }
 
-            function parse_adi(adifStr){
+
+            function readImage(file, callback_success, callback_fail){
+                let file_reader = new FileReader();
+
+                file_reader.onload = function(event){
+                    callback_success(event.target.result);
+                };
+
+                file_reader.onerror = function(event){
+                    callback_fail();
+                };
+
+                file_reader.readAsDataURL(file);
+            }
+
+
+           function parse_adi(adifStr){
                 let ap = new AdifParser(adifStr);
                 return ap.parseTopLevel();
             }
@@ -258,6 +310,11 @@
                 .forEach(
                     datum => qslPrinter(datum)
                 )
+
+                document.querySelectorAll("img.qslImage").forEach(
+                    elm => elm.setAttribute("src", qslImage)
+                );
+
             }
 
             // datum is like  {callSign: "***", qsoData: [...]}

@@ -184,4 +184,11 @@
 .info_area{
     position:static;
     margin: 0 auto;
+    text-align: center;
+}
+
+.qslImage{
+    display: inline-block;
+    max-width: 100%;
+    height:auto;
 }
