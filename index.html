@@ -252,26 +252,30 @@
                 async (files) => 
                 {
                     await repaint();
-                    qslImage="";
-                    Array.from(files).forEach(
-                        file => 
-                        readImage(file, 
-                            (
-                                s => {
-                                    qslImage = s || "";
-                                }
-                            ),
-                            (
-                                () => {
-                                    qslImage = "";
-                                }
+                    if(files.length > 0){
+                        Array.from(files).forEach(
+                            file => 
+                            readImage(file, 
+                                (
+                                    s => {
+                                        qslImage = s || "";
+                                    }
+                                ),
+                                (
+                                    () => {
+                                        qslImage = "";
+                                    }
+                                )
                             )
-                        )
-                    );
+                        );
+                        document.querySelectorAll("img.qslImage").forEach(
+                            elm => elm.setAttribute("src", qslImage)
+                        );                    }
+                    else{
+                        qslImage = "";
+                    }
                     await repaint();
-                    document.querySelectorAll("img.qslImage").forEach(
-                        elm => elm.setAttribute("src", qslImage)
-                    );
+
                 }
 
 
