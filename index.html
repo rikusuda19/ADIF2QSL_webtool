@@ -177,9 +177,9 @@
 
             const statusTextArea = document.getElementById("txt_status");
 
-            let qslImage;
+            let qslImage = "";
 
-            let cardCounter;
+            let cardCounter = 0;
 
             const repaint = async () => {
                 for (let i = 0; i < 2; i++) {
@@ -230,7 +230,7 @@
                         readImage(file, 
                             (
                                 s => {
-                                    qslImage = s;
+                                    qslImage = s || "";
                                 }
                             ),
                             (
