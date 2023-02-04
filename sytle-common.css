@@ -4,7 +4,7 @@
 
 
 .hidden{
-    display:none; 
+    display:none !important;
 }
 
 #qsl_area{
@@ -28,7 +28,7 @@
     top:0mm;
     left:0mm;
     box-sizing: border-box;
-    padding: 0mm 5mm;
+    padding: 0mm 0mm;
     page-break-after:always;
     break-after:always;
     page-break-inside:avoid;
@@ -76,6 +76,20 @@
     width: 5mm;
     color: red;
     font-weight:bold;
+}
+
+.qslTo_box{
+    display: table-cell;
+    vertical-align: bottom;
+    position: absolute;
+    top: 11mm;
+    right: 4mm;
+    height:9mm;
+    width: 55mm;
+    font-size:6mm;
+    font-weight:bold;
+    text-align:center;
+    color: red;
 }
 
 .table_bureau_call{
@@ -167,12 +181,16 @@
 
 .table_qsoData{
     position:relative;
-    margin: 0 auto;
+    margin: 2mm auto 0;
 }
 
 .table_qsoData td, .table_qsoData th{
     text-align: center;
     white-space:nowrap;
+}
+
+.table_qsoData th{
+    vertical-align: top;
 }
 
 .table_qsoData td.qslMsg{
@@ -183,8 +201,14 @@
 
 .info_area{
     position:static;
+    padding: 0 5mm;
     margin: 0 auto;
     text-align: center;
+    min-height: 0mm;
+}
+
+.remarks{
+    text-align:left;
 }
 
 .qslImage{

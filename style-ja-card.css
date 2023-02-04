@@ -1,7 +1,7 @@
 
 :root {
     --card-width: 100mm;
-    --card-height:150mm;
+    --card-height:148mm;
 }
 
 * {
@@ -14,7 +14,7 @@
 }
 
 @page {
-    size: 100mm 150mm;
+    size: 100mm 148mm;
     margin: 0mm;
 }
 

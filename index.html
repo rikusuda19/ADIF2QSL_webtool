@@ -23,6 +23,7 @@
                     <li>2022-12-20: ver 0.1.0 alpha (first publishing, experimental)</li>
                     <li>2023-01-01: ver 0.1.1 alpha (experimental)</li>
                     <li>2023-01-09: ver 0.1.2 alpha (experimental)</li>
+                    <li>2023-02-04: ver 0.2.0 alpha (experimental)</li>
                 </ul>
             </p>
             <p>GitHub repository: <a href="https://github.com/rikusuda19/ADIF2QSL_webtool" target="_blank">https://github.com/rikusuda19/ADIF2QSL_webtool</a>                
@@ -36,37 +37,11 @@
                 <label for="list_cardSize">Card Size: </label>
                 <select id="list_cardSize" onchange="cssSelector(this.value)">
                     <option value="intl-card" selected>International card size (90mm * 140mm)</option>
-                    <option value="ja-card">JA card size (100mm * 150mm)</option>
+                    <option value="ja-card">JA card size (100mm * 148mm)</option>
                     <option value="sticker">Sticker (A4 Portrait)</option>
+                    <option value="sticker-a4l">Sticker (A4 Landscape)</option>
                 </select>
             </p>
-            
-            <p>
-                <input type="checkbox" checked id="chk_displayOP" onChange="switchOPField();"></input>
-                <label for="chk_displayOP">Display OP column</label>
-                <label for="txt_opDefault" style="margin-left:10px;">Default:</label>
-                <input type="text" id="txt_opDefault" maxlength="20" size="25">
-            </p>
-
-            <p>
-                <input type="checkbox" checked id="chk_displayDE" onchange="switchDEField();"></input>
-                <label for="chk_displayDE">Display DE column</label>
-                <label for="txt_deDefault" style="margin-left:10px;">Default:</label>
-                <input type="text" id="txt_deDefault" maxlength="20" size="25">
-            </p>
-            <p>
-                <input type="checkbox" checked id="chk_useJSTForJA"></input>
-                <label for="chk_useJSTForJA">Use JST (= UTC+9) for JA stations</label>
-            </p>
-            <p>
-                <input type="checkbox" checked id="chk_orderdByJARLRule"></input>
-                <label for="chk_orderdByJARLRule">Order by JARL Bureau's Rule</label>
-            </p>
-            <p>
-                <label for="num_maxRows">Max number of QSO data per card:</label>
-                <input type="number" id="num_maxRows" min="1" max="100" value="10">
-            </p>
-
             <p>
                 <label for="btn_imgFile">QSL Logo</label>
                 <input id="btn_imgFile" type="file" accept="image/*" onChange="btn_imgFile_clicked(this.files)" ></input>
@@ -76,6 +51,52 @@
                 <label for="btn_adifFile">ADIF File</label>
                 <input id="btn_adifFile" type="file" accept=".adi, .txt" onChange="btn_adifFile_clicked(this.files)" ></input>
             </p>
+
+
+            <details>
+                <summary>Preferences</summary>
+                <p>
+                    <input type="checkbox" checked id="chk_displayOP" onChange="switchOPField();"></input>
+                    <label for="chk_displayOP">Display OP column</label>
+                    <label for="txt_opDefault" style="margin-left:10px;">Default:</label>
+                    <input type="text" id="txt_opDefault" maxlength="20" size="25" value="----">
+                </p>
+
+                <p>
+                    <input type="checkbox" checked id="chk_displayDE" onchange="switchDEField();"></input>
+                    <label for="chk_displayDE">Display DE column</label>
+                    <label for="txt_deDefault" style="margin-left:10px;">Default:</label>
+                    <input type="text" id="txt_deDefault" maxlength="20" size="25">
+                </p>
+                <p>
+                    <input type="checkbox" id="chk_useDotBordered" onchange="switchCallSignBoxColor()"></input>
+                    <label for="chk_useDotBordered">Use Black-Dot-Bordered Callsign Boxes</label>
+                </p>
+
+                <p>
+                    <input type="checkbox" checked id="chk_useJSTForJA"></input>
+                    <label for="chk_useJSTForJA">Use JST (= UTC+9) for JA stations</label>
+                </p>
+                
+                <p>
+                    <input type="checkbox" checked id="chk_orderdByJARLRule"></input>
+                    <label for="chk_orderdByJARLRule">Order by JARL Bureau's Rule</label>
+                </p>
+
+                <p>
+                    <label for="num_maxRows">Max number of QSO data per card:</label>
+                    <input type="number" id="num_maxRows" min="1" max="100" value="10">
+                </p>
+
+                <p>
+                    <label for="txt_remarks">Remarks (HTML):</label><br>
+                    <textarea id="txt_remarks"></textarea>
+                </p>
+
+
+            </details>
+
+
 
             <p>
                 <button id="btn_process" type="button" onclick="btn_adifFile_clicked(document.getElementById('btn_adifFile').files);">Reload</button>
@@ -135,19 +156,12 @@
                         </tbody>
                     </table>
 
+                    <div class="qslTo_box"></div>
+
                     <div class="data_area">
                         <div class="statement">Confirming our QSO</div>
                         <table class="table_qsoData" id="table_qsoData_template">
                             <thead>
-                                <tr>
-                                    <td></td>
-                                    <td class="tablecell_timezone" id="tablecell_timezone_template"></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                </tr>
                                 <tr>
                                     <th class="qsoHeaderCell qsoHeader_date">DATE</th>
                                     <th class="qsoHeaderCell qsoHeader_time">TIME</th>
@@ -161,12 +175,12 @@
                             <tbody>
                             </tbody>
                             <tfoot>
-
                             </tfoot>
                         </table>
                     </div>
 
                     <div class="info_area">
+                        <div class="remarks"></div>
                         <img class="qslImage" />
                     </div>
 
@@ -231,6 +245,7 @@
                 async (files) => 
                 {
                     await repaint();
+                    qslImage="";
                     Array.from(files).forEach(
                         file => 
                         readImage(file, 
@@ -322,13 +337,32 @@
 
                 qslData.forEach(datum => qslPrinter(datum))
 
-                document.querySelectorAll("img.qslImage").forEach(
-                    elm => elm.setAttribute("src", qslImage)
-                );
+                let qslRemarks = document.querySelector("#txt_remarks").value;
+
+                if(!qslImage && !qslRemarks){
+                    document.querySelectorAll(".info_area").forEach(
+                            elm => elm.classList.add("hidden")
+                        )
+                }
+                else{
+
+                    document.querySelectorAll(".info_area").forEach(
+                            elm => elm.classList.remove("hidden")
+                        )
+
+                    document.querySelectorAll(".info_area img.qslImage").forEach(
+                        elm => elm.setAttribute("src", qslImage)
+                    );
+
+                    document.querySelectorAll(".info_area .remarks").forEach(
+                        elm => {elm.innerHTML = qslRemarks;}
+                    );
+                                
+                }
 
             }
 
-            // datum is like  {callSign: "***", qsoData: [...]}
+            // datum is like  {callSign: "***", qsoData: [...], JARLBureauOrderKey="***"}
             function qslPrinter(datum){
                 cardCounter++;
 
@@ -367,23 +401,17 @@
                 // Fill the JARL Bureau Frame / 転送枠
                 let callSignBoxes_for_bureau_wrapper = qsl_page.querySelector(".table_bureau_call");
                 let callSignBoxes_for_bureau = callSignBoxes_for_bureau_wrapper.querySelectorAll("tbody td");
+                
                 let callSignForBureau = JACallSignSplitter(datum.callSign);
 
                 let isJARLStyleCheckbox = qsl_page.querySelector("#chk_JARLStyleFrame_" + qslID);
+                isJARLStyleCheckbox.checked = isJA;
 
                 let callSignTextBox = qsl_page.querySelector("#txt_qslto_callsign_" + qslID);
+                callSignTextBox.value = callSignForBureau;
 
                 qsl_page.querySelector("#chk_via_" + qslID).checked = false;
-
-                if(isJA){
-                    isJARLStyleCheckbox.checked = true;
-                    callSignTextBox.value = callSignForBureau;
-                }
-                else{
-                    isJARLStyleCheckbox.checked = false;
-                    callSignTextBox.value = "";
-                }
-
+                
                 qslTo_redraw(qsl_page.id);
 
 
@@ -398,8 +426,18 @@
                 let table_id = data_table.id;
 
 
-                let timeZoneIndicator = document.querySelector("#" + table_id + " .tablecell_timezone");
-                timeZoneIndicator.appendChild(document.createTextNode((isJA && useJST) ? "(JST)" : "(UTC)"));
+                // let timeZoneIndicator = document.querySelector("#" + table_id + " .tablecell_timezone");
+                // timeZoneIndicator.appendChild(document.createTextNode((isJA && useJST) ? "(JST)" : "(UTC)"));
+                qsl_page.querySelector(".qsoHeader_time").innerHTML += "<br>" + ((isJA && useJST) ? "(JST)" : "(UTC)");
+
+                let includeFreq = datum.qsoData.reduce((accum, qso) => (accum || !isNaN(qso.freq)), false);
+                if(includeFreq){
+                    // document.querySelector("#" + table_id + " .tablecell_megaHertz").appendChild(document.createTextNode("(MHz)"));
+                    qsl_page.querySelector(".qsoHeader_freq").innerHTML = "FREQ<br>" + "(MHz)";
+                }
+                else{
+                    qsl_page.querySelector(".qsoHeader_freq").innerHTML = "BAND";           
+                }
                 
                 let maxQSOsRow = document.getElementById("num_maxRows").value;
 
@@ -440,7 +478,7 @@
 
                     let bandCell = tableRow.insertCell(-1);
                     bandCell.className = "qsoDatumCell qsoDatum_band";
-                    bandCell.appendChild(document.createTextNode( !isNaN(qso.freq) ? parseFloat(qso.freq).toFixed(3) : qso.band));
+                    bandCell.appendChild(document.createTextNode( !isNaN(qso.freq) ? parseFloat(qso.freq).toPrecision(4) : qso.band));
 
                     let modeCell = tableRow.insertCell(-1);
                     modeCell.className = "qsoDatumCell qsoDatum_mode";
@@ -458,8 +496,14 @@
                     deCell.className = "qsoDatumCell qsoDatum_de";
                     deCell.appendChild(document.createTextNode(qso.station_callsign || defaultDE || ""));
 
-                    let qslMessage = (qso.qslmsgintl || "") + (qso.qslmsg || "");
-                    
+                    let qslMessage 
+                        = (qso.qslmsgintl ? qso.qslmsgintl + " " : "") 
+                        + (qso.qslmsg ? qso.qslmsgintl + " " : "")
+                        + (qso.sat_name ? "via SAT:" + qso.sat_name + " ": "")
+                        + (!isNaN(qso.freq_rx) ? "RX Freq: " + parseFloat(qso.freq_rx).toPrecision(4).toString() + " MHz" :  
+                                (qso.band_rx ? "RX Band: " + qso.band_rx : "")
+                            );
+                        
                     if(qslMessage.trim()!=""){
                         let msgRow = data_table.tBodies[0].insertRow(-1);
                         let msgCell = msgRow.insertCell(-1);
@@ -568,7 +612,7 @@
                 let isJARLStyleCheckBox = qslPage.querySelector(".chk_JARLStyleFrame");
                 let JARLStyleCallsignBoxesWrapper =  qslPage.querySelector(".table_bureau_call");
                 let JARLStyleCallsignBoxes = JARLStyleCallsignBoxesWrapper.querySelectorAll("tbody td");
-            
+                let DXCallsignBox = qslPage.querySelector(".qslTo_box");
 
                 let qslToCallSignTextBox = qslPage.querySelector(".txt_qslto_callsign")
 
@@ -580,19 +624,37 @@
                 }
 
 
+                let useDotBorderBox = document.querySelector("#chk_useDotBordered").checked;
+
                 if(isJARLStyleCheckBox.checked){
+                    JARLStyleCallsignBoxesWrapper.classList.remove("hidden");
+                    /*
                     JARLStyleCallsignBoxes.forEach(
                         b => {
-                            b.classList.add("red_bordered");
+                            b.classList.add(useDotBorderBox ? "dot_bordered" : "red_bordered");
                         }
                     )
+                    */
+                    DXCallsignBox.classList.add("hidden");
                 }
                 else{
+                    JARLStyleCallsignBoxesWrapper.classList.add("hidden");
+                    /*
                     JARLStyleCallsignBoxes.forEach(
                         b => {
                             b.classList.remove("red_bordered","dot_bordered");
                         }
                     )
+                    */
+                    DXCallsignBox.classList.remove("hidden");
+
+                }
+
+                if((!isJARLStyleCheckBox.checked) && viaCheckBox.checked){
+                    DXCallsignBox.classList.remove("hidden");
+                }
+                else{
+                    DXCallsignBox.classList.add("hidden");
                 }
 
                 for (let index = 0; index < JARLStyleCallsignBoxes.length; index++) {
@@ -606,6 +668,8 @@
                         }
                         
                 }
+
+                DXCallsignBox.innerText = qslToCallSignTextBox.value;
 
             }
 
@@ -645,6 +709,20 @@
                 }
             }
 
+            function switchCallSignBoxColor(){
+                let useDotBorderedChkBox = document.querySelector("#chk_useDotBordered");
+                let chkStatus = useDotBorderedChkBox.checked;
+
+                let callSignBoxes = document.querySelectorAll(".table_bureau_call td")
+                
+                callSignBoxes.forEach(b => {
+                            b.classList.remove(chkStatus ? "red_bordered" : "dot_bordered");
+                            b.classList.add(chkStatus ? "dot_bordered" : "red_bordered")
+                    });
+
+
+            }
+
             function cssSelector(value){
 
                 let elm = document.getElementById("css-cardsize");
@@ -662,6 +740,10 @@
 
                     case "sticker":
                         elm.href="style-sticker.css?t=" + str;
+                        break;
+
+                    case "sticker-a4l":
+                        elm.href="style-sticker-a4l.css?t=" + str;
                         break;
 
                     default:

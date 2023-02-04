@@ -21,13 +21,13 @@
 
 
 @page {
-    size: A4 portrait;
+    size: A4 landscape;
     margin: 5mm;
 }
 
 @media print{
     body{
-        width: 210mm;
+        width: 297mm;
         margin: 5mm ;
     }
 
