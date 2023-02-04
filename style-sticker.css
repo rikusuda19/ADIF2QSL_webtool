@@ -17,6 +17,7 @@
     width: var(--card-width);
     height: auto;
     min-height: 40mm;
+    max-height: calc(var(--card-height) - 20mm)
 }
 
 
