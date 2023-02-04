@@ -570,12 +570,11 @@
             }
 
             function JARLBureauOrderKey(callSign){
-                let baseCallSign = JACallSignSplitter(callSign);
 
                 let resultKey = "";
 
-                if(JACallSignRegex.test(baseCallSign)){
-                    let callSignMatch = baseCallSign.match(JACallSignRegex);
+                if(JACallSignRegex.test(callSign)){
+                    let callSignMatch = callSign.match(JACallSignRegex);
                     switch(callSignMatch.groups.prefix[0]){
                         case "J":
                             resultKey = "1" 
@@ -600,11 +599,11 @@
                             break;
 
                         default:
-                            resultKey = "0" + baseCallSign
+                            resultKey = "0" + callSign
                     }
                 }
                 else{
-                    resultKey = "0" + baseCallSign
+                    resultKey = "0" + callSign
                 }
 
                 return resultKey;
