@@ -55,8 +55,12 @@
                 <input type="text" id="txt_deDefault" maxlength="20" size="25">
             </p>
             <p>
-                <input type="checkbox" checked id="chk_useJSTForJA" checked></input>
+                <input type="checkbox" checked id="chk_useJSTForJA"></input>
                 <label for="chk_useJSTForJA">Use JST (= UTC+9) for JA stations</label>
+            </p>
+            <p>
+                <input type="checkbox" checked id="chk_orderdByJARLRule"></input>
+                <label for="chk_orderdByJARLRule">Order by JARL Bureau's Rule</label>
             </p>
             <p>
                 <label for="num_maxRows">Max number of QSO data per card:</label>
@@ -177,6 +181,8 @@
 
             const statusTextArea = document.getElementById("txt_status");
 
+            const JACallSignRegex = /^(?<prefix>J[A-S]|7[J-N]|8[J-N])(?<area>\d)(?<suffix>[0-9A-Za-z]+)(?:\/(?<modifier>.+))?$/i;
+
             let qslImage = "";
 
             let cardCounter = 0;
@@ -287,8 +293,10 @@
             }
 
             function display_QSO_data(adifObj){
+                // ADIF records
                 let records = adifObj?.records;
 
+                // Get the list of "callsign" value to obtain unique callsign list
                 let callList = Array.from(new Set(records?.map(elm => elm.call).sort())).filter(elm => (elm));
 
                 if(!callList){return;}
@@ -297,19 +305,22 @@
                     callList.map(
                         callSign => ({
                             "callSign": callSign,
+                            "JARLBureauOrderKey": JARLBureauOrderKey(callSign),
                             "qsoData": records.filter(
-                                elm => (elm.call === callSign)
+                                    elm => (elm.call === callSign)
                                 )
                         })
                 );
 
-                
-                qslData
-                //.sort((d1,d2) => d2.qsoData.length -  d1.qsoData.length)
-                //.filter(data => new RegExp(/^(?:J[A-S]|7[J-N]|8[J-N])/gm).test(data.callSign))
-                .forEach(
-                    datum => qslPrinter(datum)
-                )
+                let orderByJARLRule = document.getElementById("chk_orderdByJARLRule").checked; 
+                if(orderByJARLRule){
+                    qslData.sort(
+                            (d1,d2) => 
+                                    (d1.JARLBureauOrderKey > d2.JARLBureauOrderKey) ? 1 : -1
+                        );
+                } 
+
+                qslData.forEach(datum => qslPrinter(datum))
 
                 document.querySelectorAll("img.qslImage").forEach(
                     elm => elm.setAttribute("src", qslImage)
@@ -321,9 +332,10 @@
             function qslPrinter(datum){
                 cardCounter++;
 
-                let isJA = new RegExp(/^(?:J[A-S]|7[J-N]|8[J-N])/gm).test(datum.callSign);
-                let useJST = document.getElementById("chk_useJSTForJA")?.checked;
                 let safeCallSign = datum.callSign?.replace("/","-");
+
+                let isJA = JACallSignRegex.test(datum.callSign);
+                let useJST = document.getElementById("chk_useJSTForJA")?.checked;
 
                 let qslID = cardCounter + "_" + safeCallSign
 
@@ -504,6 +516,49 @@
                 }
 
                 return callSignLetters;
+            }
+
+            function JARLBureauOrderKey(callSign){
+                let baseCallSign = JACallSignSplitter(callSign);
+
+                let resultKey = "";
+
+                if(JACallSignRegex.test(baseCallSign)){
+                    let callSignMatch = baseCallSign.match(JACallSignRegex);
+                    switch(callSignMatch.groups.prefix[0]){
+                        case "J":
+                            resultKey = "1" 
+                                    + ((parseInt(callSignMatch.groups.area) - 1 + 10)% 10 + 1).toString(16)
+                                    + callSignMatch.groups.prefix
+                                    + callSignMatch.groups.suffix.length
+                                    + callSignMatch.groups.suffix;
+                            break;
+
+                        case "7":
+                            resultKey = "7"
+                                    + (parseInt(callSignMatch.groups.area) + 1).toString(16)
+                                    + callSignMatch.groups.prefix
+                                    + callSignMatch.groups.suffix.length
+                                    + callSignMatch.groups.suffix;
+                            break;
+
+                        case "8":
+                            resultKey = "8"
+                                    + (parseInt(callSignMatch.groups.area) + 1).toString(16)
+                                    + callSignMatch.groups.prefix
+                                    + callSignMatch.groups.suffix.length
+                                    + callSignMatch.groups.suffix;
+                            break;
+
+                        default:
+                            resultKey = "0" + baseCallSign
+                    }
+                }
+                else{
+                    resultKey = "0" + baseCallSign
+                }
+
+                return resultKey;
             }
 
             function qslTo_redraw(sectionID){
