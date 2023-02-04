@@ -177,11 +177,13 @@
     font-weight:bold; 
     font-size:12pt; 
     margin-bottom: 0mm;
+    padding: 3mm 0mm;
+    width: 100%;
 }
 
 .table_qsoData{
     position:relative;
-    margin: 2mm auto 0;
+    margin: 2mm auto;
 }
 
 .table_qsoData td, .table_qsoData th{
