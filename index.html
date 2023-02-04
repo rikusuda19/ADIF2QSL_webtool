@@ -221,26 +221,30 @@
                     statusTextArea.textContent = "Processing...";
 
                     await repaint();
-                    Array.from(files).forEach(
-                        file => 
-                        readFile(file, 
-                            (
-                                s => {
-                                    display_QSO_data(parse_adi(s));
-                                    statusTextArea.textContent = cardCounter + " QSL card" + (cardCounter > 1 ? "s have" : " has") + " been produced."
-                                }
-                            ),
-                            (
-                                () => {
-                                    statusTextArea.textContent = "FILE ERROR!"
-                                }
+
+                    if(files.length > 0){
+                        Array.from(files).forEach(
+                            file => 
+                            readFile(file, 
+                                (
+                                    s => {
+                                        display_QSO_data(parse_adi(s));
+                                        statusTextArea.textContent = cardCounter + " QSL card" + (cardCounter > 1 ? "s have" : " has") + " been produced."
+                                    }
+                                ),
+                                (
+                                    () => {
+                                        statusTextArea.textContent = "FILE ERROR!"
+                                    }
+                                )
                             )
                         )
-                    );
-                    await repaint();
-                    if(!cardCounter){
+                    }
+                    else{
                         statusTextArea.innerText = "Choose an ADIF file."
                     }
+
+                    await repaint();
                 }
 
 
