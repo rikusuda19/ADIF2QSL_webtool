@@ -273,19 +273,24 @@
                             readImage(file, 
                                 (
                                     s => {
-                                        qslImage = s || "";
-                                    }
+                                            qslImage = s || "";
+                                            document.querySelectorAll("img.qslImage").forEach(
+                                                elm => elm.setAttribute("src", qslImage)
+                                            );
+                                        }
                                 ),
                                 (
                                     () => {
                                         qslImage = "";
+                                        document.querySelectorAll("img.qslImage").forEach(
+                                                elm => elm.setAttribute("src", qslImage)
+                                            );
                                     }
                                 )
                             )
                         );
-                        document.querySelectorAll("img.qslImage").forEach(
-                            elm => elm.setAttribute("src", qslImage)
-                        );                    }
+
+                    }
                     else{
                         qslImage = "";
                     }
