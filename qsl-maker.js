@@ -130,20 +130,20 @@
     }
 
 
-    const qslRemarks = document.querySelector("#txt_remarks").value;
+    const qslRemarksBox = document.querySelector("#txt_remarks");
 
-    const orderByJARLRule = document.getElementById("chk_orderdByJARLRule").checked; 
-    const useJST = document.getElementById("chk_useJSTForJA").checked;
-    const useDotBorderBox = document.querySelector("#chk_useDotBordered").checked;
+    const orderByJARLRuleChkBox = document.getElementById("chk_orderdByJARLRule"); 
+    const useJSTChkBox = document.getElementById("chk_useJSTForJA");
+    const useDotBorderBoxChkBox = document.querySelector("#chk_useDotBordered");
 
-    const maxQSOsRow = document.getElementById("num_maxRows").value;
+    const maxQSOsRowBox = document.getElementById("num_maxRows");
     const maxQSOsRowDefault = 10;
     
-    const DisplayOP = document.querySelector("#chk_displayOP").checked;
-    const defaultOP = document.getElementById("txt_opDefault").value;
+    const displayOPChkBox = document.querySelector("#chk_displayOP");
+    const defaultOPBox = document.getElementById("txt_opDefault");
 
-    const DisplayDE = document.querySelector("#chk_displayDE").checked;
-    const defaultDE = document.getElementById("txt_deDefault").value;
+    const displayDEChkBox = document.querySelector("#chk_displayDE");
+    const defaultDEBox = document.getElementById("txt_deDefault");
 
     async function display_QSO_data(adifObj){
         // ADIF records
@@ -165,7 +165,7 @@
                 })
         );
 
-        if(orderByJARLRule){
+        if(orderByJARLRuleChkBox.checked){
             qslData.sort(
                     (d1,d2) => 
                             (d1.JARLBureauOrderKey > d2.JARLBureauOrderKey) ? 1 : -1
@@ -248,6 +248,7 @@
 
         // let timeZoneIndicator = document.querySelector("#" + table_id + " .tablecell_timezone");
         // timeZoneIndicator.appendChild(document.createTextNode((isJA && useJST) ? "(JST)" : "(UTC)"));
+        let useJST = useJSTChkBox.checked;
         qsl_page.querySelector(".qsoHeader_time").innerHTML += "<br>" + ((isJA && useJST) ? "(JST)" : "(UTC)");
 
         let includeFreq = datum.qsoData.reduce((accum, qso) => (accum || !isNaN(qso.freq)), false);
@@ -260,7 +261,7 @@
         }
         
 
-        const maxQSOsRowInt = Number.isNaN(maxQSOsRow) ? maxQSOsRowDefault : Number.parseInt(maxQSOsRow);
+        const maxQSOsRowInt = Number.isNaN(maxQSOsRowBox.value) ? maxQSOsRowDefault : Number.parseInt(maxQSOsRowBox.value);
 
 
         // Fill the Table / 表に書き込む
@@ -304,10 +305,12 @@
             reportCell.appendChild(document.createTextNode(qso.rst_sent));
 
             const opCell = tableRow.insertCell(-1);
+            const defaultOP = defaultOPBox.value;
             opCell.className = "qsoDatumCell qsoDatum_op";
             opCell.appendChild(document.createTextNode(qso.operator || defaultOP || ""));
 
             const deCell = tableRow.insertCell(-1);
+            const defaultDE = defaultDEBox.value;
             deCell.className = "qsoDatumCell qsoDatum_de";
             deCell.appendChild(document.createTextNode(qso.station_callsign || defaultDE || ""));
 
@@ -328,6 +331,7 @@
             }
         }                      
 
+        const qslRemarks = qslRemarksBox.value;
         if(!qslImage && !qslRemarks){
             qsl_page.querySelectorAll(".info_area").forEach(
                     elm => elm.classList.add("hidden")
@@ -344,7 +348,7 @@
             );
 
             qsl_page.querySelectorAll(".info_area .remarks").forEach(
-                elm => {elm.innerHTML = qslRemarks;}
+                elm => {elm.innerHTML =  DOMPurify.sanitize(qslRemarks);}
             );          
         }
 
@@ -514,7 +518,7 @@
         const opFields = document.querySelectorAll(".qsoDatum_op");
         const opHeaders = document.querySelectorAll(".qsoHeader_op");
 
-        if(DisplayOP){
+        if(displayOPChkBox.checked){
             opFields.forEach(f => f.classList.remove("hidden"));
             opHeaders.forEach(f => f.classList.remove("hidden"));
         }
@@ -530,7 +534,7 @@
         const deHeaders = document.querySelectorAll(".qsoHeader_de");
 
 
-        if(DisplayDE){
+        if(displayDEChkBox.checked){
             deFields.forEach(f => f.classList.remove("hidden"));
             deHeaders.forEach(f => f.classList.remove("hidden"));
         }
@@ -544,6 +548,8 @@
 
         const callSignBoxes = document.querySelectorAll(".table_bureau_call td");
         
+        let useDotBorderBox=useDotBorderBoxChkBox.checked;
+
         callSignBoxes.forEach(b => {
                     b.classList.remove(useDotBorderBox ? "red_bordered" : "dot_bordered");
                     b.classList.add(useDotBorderBox ? "dot_bordered" : "red_bordered")

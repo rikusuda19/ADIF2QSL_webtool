@@ -6,13 +6,14 @@
         <script src="./adif_parser.js"></script>
         <script src="./moment.js"></script>
         <script src="./moment-timezone.js"></script>
+        <script src="./DOMpurify/dist/purify.min.js"></script>
 
         <script type="text/javascript">
             let modified = new Date();
-            let str = modified.toISOString();
-            document.write('<link href="./sytle-common.css?t=' + str + '" rel="stylesheet" type="text/css">');
+            let timestamp = modified.toISOString();
+            document.write('<link href=\".\/sytle-common.css?t=' + timestamp + '\" rel=\"stylesheet\" type=\"text\/css\" \/>');
+            document.write('<link href=\".\/style-intl-card.css?t=' + timestamp + '\" rel=\"stylesheet\" type=\"text\/css\" id=\"css-cardsize\" \/>');
         </script>
-        <link rel="stylesheet" type="text/css" href="style-intl-card.css" id="css-cardsize">
 
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://www.jr2khb.net/qsl_maker/index.html" />
@@ -31,7 +32,7 @@
 
     </head>
 
-    <body onload="cssSelector('intl-card')">
+    <body>
         <header class="no-print">
             <h2 style="font-size:large;">
                 ADIF -> QSL Maker
@@ -46,6 +47,8 @@
                         <li>2023-01-09: ver 0.1.2 alpha (experimental)</li>
                         <li>2023-02-04: ver 0.2.0 alpha (experimental)</li>
                         <li>2023-02-05: ver 0.2.1 alpha (experimental)</li>
+                        <li>2023-02-05: ver 0.2.2 alpha (experimental)</li>
+
                     </ul>
                 </details>
             </p>
@@ -211,8 +214,9 @@
             </section>
 
         </div>
-        
-        <script src="./qsl-maker.js"></script>
 
+        <script type="text/javascript">
+            document.write('<script src=\".\/qsl-maker.js?t=' + timestamp + '\">' + "<\/script>");
+        </script>
     </body>
 </html>

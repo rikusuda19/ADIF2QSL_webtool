@@ -15,5 +15,6 @@ https://www.jr2khb.net/qsl_maker/index.html
 - adif_parser.js  
   Originated from [K0SWE's adif-parser-ts](https://github.com/k0swe/adif-parser-ts) (typescript)
 - [moment.js](https://momentjs.com/), [moment-timezone.js](https://momentjs.com/timezone/)
+- [cure53's DOMPurify](https://github.com/cure53/DOMPurify)
 - qsl-maker.js  
   My original.
