@@ -43,7 +43,7 @@
                 
                 if(readStatus){
                     try {
-                        await display_QSO_data(parse_adi(adifStr));         
+                        await makeQSLData(parse_adi(adifStr));         
                     } catch (error) {
                         statusTextArea.textContent = "FILE ERROR!";            
                     }
@@ -145,7 +145,7 @@
     const displayDEChkBox = document.querySelector("#chk_displayDE");
     const defaultDEBox = document.getElementById("txt_deDefault");
 
-    async function display_QSO_data(adifObj){
+    async function makeQSLData(adifObj){
         // ADIF records
         const records = adifObj?.records;
 
@@ -172,19 +172,19 @@
                 );
         } 
 
-        await qslData.forEach(datum => qslPrinter(datum));
+        await qslData.forEach(datum => printQSL(datum));
 
         /*
         // To paint every card during processing, use this code (but very slow)
         for(datum of qslData){
-            await qslPrinter(datum); 
+            await printQSL(datum); 
             await repaint();
         }
         */
     }
 
     // datum is like  {callSign: "***", qsoData: [...], JARLBureauOrderKey="***"}
-    async function qslPrinter(datum){
+    async function printQSL(datum){
         cardCounter++;
 
         const safeCallSign = datum.callSign?.replace("/","-");
@@ -268,7 +268,7 @@
         for(let j = 0; j < datum.qsoData.length; j++){
 
             if(j + 1 > maxQSOsRowInt){
-                await qslPrinter(
+                await printQSL(
                     {
                         callSign: datum.callSign,
                         qsoData: datum.qsoData.slice(maxQSOsRowInt)
