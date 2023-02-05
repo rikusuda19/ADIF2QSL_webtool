@@ -238,22 +238,27 @@
                     await repaint();
 
                     if(files.length > 0){
-                        Array.from(files).forEach(
-                            file => 
-                            readFile(file, 
-                                (
-                                    s => {
-                                        display_QSO_data(parse_adi(s));
-                                        statusTextArea.textContent = cardCounter + " QSL card" + (cardCounter > 1 ? "s have" : " has") + " been produced."
-                                    }
-                                ),
-                                (
-                                    () => {
-                                        statusTextArea.textContent = "FILE ERROR!"
+                        let adifStr;
+                        let readStatus;
+                        for(file of Array.from(files)){
+                            await new Promise(
+                                (resolve, reject) => {
+                                    readFile(
+                                            file, 
+                                            s => {adifStr = s; readStatus=true; resolve();},
+                                            () => {readStatus = false; reject();}
+                                        )
                                     }
                                 )
-                            )
-                        )
+                            
+                            if(readStatus){
+                                await display_QSO_data(parse_adi(adifStr));
+                                statusTextArea.textContent = cardCounter + " QSL card" + (cardCounter > 1 ? "s have" : " has") + " been produced."
+                            }
+                            else{
+                                statusTextArea.textContent = "FILE ERROR!"
+                            }
+                        }
                     }
                     else{
                         statusTextArea.innerText = "Choose an ADIF file."
@@ -268,28 +273,23 @@
                 {
                     await repaint();
                     if(files.length > 0){
-                        Array.from(files).forEach(
-                            file => 
-                            readImage(file, 
-                                (
-                                    s => {
-                                            qslImage = s || "";
-                                            document.querySelectorAll("img.qslImage").forEach(
-                                                elm => elm.setAttribute("src", qslImage)
-                                            );
-                                        }
-                                ),
-                                (
-                                    () => {
-                                        qslImage = "";
-                                        document.querySelectorAll("img.qslImage").forEach(
-                                                elm => elm.setAttribute("src", qslImage)
-                                            );
+
+                        let readStatus;
+                        for(file of Array.from(files)){
+                            await new Promise(
+                                (resolve, reject) => {
+                                    readImage(
+                                            file, 
+                                            s => {qslImage = s || ""; readStatus=true; resolve();},
+                                            () => {qslImage = ""; readStatus = false; reject();}
+                                        )
                                     }
                                 )
-                            )
-                        );
-
+                            
+                            document.querySelectorAll("img.qslImage").forEach(
+                                    elm => elm.setAttribute("src", qslImage)
+                                );
+                        }
                     }
                     else{
                         qslImage = "";
@@ -300,7 +300,7 @@
 
 
 
-            function readFile(file, callback_success, callback_fail){
+            function readFile(file, callback_success={}, callback_fail={}){
 
                 let file_reader = new FileReader();
 
@@ -338,12 +338,12 @@
                 return ap.parseTopLevel();
             }
 
-            function display_QSO_data(adifObj){
+            async function display_QSO_data(adifObj){
                 // ADIF records
                 let records = adifObj?.records;
 
                 // Get the list of "callsign" value to obtain unique callsign list
-                let callList = Array.from(new Set(records?.map(elm => elm.call).sort())).filter(elm => (elm));
+                let callList = Array.from(new Set(records?.map(elm => elm.call).sort())).filter(call => (call.trim() !== ""));
 
                 if(!callList){return;}
                 
@@ -366,35 +366,19 @@
                         );
                 } 
 
-                qslData.forEach(datum => qslPrinter(datum))
+                await qslData.forEach(datum => qslPrinter(datum));
 
-                let qslRemarks = document.querySelector("#txt_remarks").value;
-
-                if(!qslImage && !qslRemarks){
-                    document.querySelectorAll(".info_area").forEach(
-                            elm => elm.classList.add("hidden")
-                        )
+                /*
+                // To paint every card during processing, use this code (but very slow)
+                for(datum of qslData){
+                    await qslPrinter(datum); 
+                    await repaint();
                 }
-                else{
-
-                    document.querySelectorAll(".info_area").forEach(
-                            elm => elm.classList.remove("hidden")
-                        )
-
-                    document.querySelectorAll(".info_area img.qslImage").forEach(
-                        elm => elm.setAttribute("src", qslImage)
-                    );
-
-                    document.querySelectorAll(".info_area .remarks").forEach(
-                        elm => {elm.innerHTML = qslRemarks;}
-                    );
-                                
-                }
-
+                */
             }
 
             // datum is like  {callSign: "***", qsoData: [...], JARLBureauOrderKey="***"}
-            function qslPrinter(datum){
+            async function qslPrinter(datum){
                 cardCounter++;
 
                 let safeCallSign = datum.callSign?.replace("/","-");
@@ -448,12 +432,12 @@
 
                 // Switch "QSO" or "QSOs"
                 if(datum.qsoData.length > 1){
-                    document.querySelector("#" + qsl_page.id + " .statement").innerText += "s";
+                    qsl_page.querySelector(".statement").innerText += "s";
                 }
 
 
                 // Create a Table for QSO Data / 表を作る
-                let data_table = document.querySelector("#" + qsl_page.id + " .table_qsoData");
+                let data_table = qsl_page.querySelector(".table_qsoData");
                 let table_id = data_table.id;
 
 
@@ -483,7 +467,7 @@
                 for(let j = 0; j < datum.qsoData.length; j++){
 
                     if(j + 1 > maxQSOsRowInt){
-                        qslPrinter(
+                        await qslPrinter(
                             {
                                 callSign: datum.callSign,
                                 qsoData: datum.qsoData.slice(maxQSOsRowInt)
@@ -528,14 +512,14 @@
                     deCell.appendChild(document.createTextNode(qso.station_callsign || defaultDE || ""));
 
                     let qslMessage 
-                        = (qso.qslmsgintl ? qso.qslmsgintl + " " : "") 
-                        + (qso.qslmsg ? qso.qslmsgintl + " " : "")
-                        + (qso.sat_name ? "via SAT:" + qso.sat_name + " ": "")
-                        + (!isNaN(qso.freq_rx) ? "RX Freq: " + parseFloat(qso.freq_rx).toPrecision(4).toString() + " MHz" :  
-                                (qso.band_rx ? "RX Band: " + qso.band_rx : "")
+                        = (qso.qslmsgintl ? qso.qslmsgintl + "; " : "") 
+                        + (qso.qslmsg ? qso.qslmsgintl + "; " : "")
+                        + (qso.sat_name ? "via SAT: " + qso.sat_name + "; ": "")
+                        + (!isNaN(qso.freq_rx) ? "RX Freq: " + parseFloat(qso.freq_rx).toPrecision(4).toString() + " MHz; " :  
+                                (qso.band_rx ? "RX Band: " + qso.band_rx +"; ": "")
                             );
                         
-                    if(qslMessage.trim()!=""){
+                    if(qslMessage.trim()!==""){
                         let msgRow = data_table.tBodies[0].insertRow(-1);
                         let msgCell = msgRow.insertCell(-1);
                         msgCell.setAttribute("colspan", 7);
@@ -543,6 +527,28 @@
                         msgCell.appendChild(document.createTextNode("(" + qslMessage.trim() + ")"));
                     }
                 }                      
+                let qslRemarks = document.querySelector("#txt_remarks").value;
+
+                if(!qslImage && !qslRemarks){
+                    qsl_page.querySelectorAll(".info_area").forEach(
+                            elm => elm.classList.add("hidden")
+                        )
+                }
+                else{
+
+                    qsl_page.querySelectorAll(".info_area").forEach(
+                            elm => elm.classList.remove("hidden")
+                        )
+
+                    qsl_page.querySelectorAll(".info_area img.qslImage").forEach(
+                        elm => elm.setAttribute("src", qslImage)
+                    );
+
+                    qsl_page.querySelectorAll(".info_area .remarks").forEach(
+                        elm => {elm.innerHTML = qslRemarks;}
+                    );          
+                }
+
             }
             
         
