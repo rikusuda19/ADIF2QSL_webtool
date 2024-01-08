@@ -47,7 +47,7 @@
                     } catch (error) {
                         statusTextArea.textContent = "FILE ERROR!";            
                     }
-                    statusTextArea.textContent = cardCounter + " QSL card" + (cardCounter > 1 ? "s have" : " has") + " been produced."
+                    statusTextArea.textContent = cardCounter + " QSL card" + (cardCounter > 1 ? "s have" : " has") + ` been produced. To print ${(cardCounter > 1 ? "them" : "it")} out, press Ctrl + P.`
                 }
                 else{
                     statusTextArea.textContent = "FILE ERROR!";
@@ -130,8 +130,7 @@
     }
 
 
-    const qslRemarksBox = document.querySelector("#txt_remarks");
-
+    
     const orderByJARLRuleChkBox = document.getElementById("chk_orderdByJARLRule"); 
     const useJSTChkBox = document.getElementById("chk_useJSTForJA");
     const useDotBorderBoxChkBox = document.querySelector("#chk_useDotBordered");
@@ -141,16 +140,23 @@
     
     const displayOPChkBox = document.querySelector("#chk_displayOP");
     const defaultOPBox = document.getElementById("txt_opDefault");
-
+    
     const displayDEChkBox = document.querySelector("#chk_displayDE");
     const defaultDEBox = document.getElementById("txt_deDefault");
+    
+    const freqDigitsStyleBox = document.querySelector("#list_freqDigitsStyle");
+    const freqDigitsNumBox = document.querySelector("#num_freqDigitsNum");
+
+
+    const qslRemarksBox = document.querySelector("#txt_remarks");
+
 
     async function makeQSLData(adifObj){
         // ADIF records
         const records = adifObj?.records;
 
         // Get the list of "callsign" value to obtain unique callsign list
-        const callList = Array.from(new Set(records?.map(elm => elm.call).sort())).filter(call => (call.trim() !== ""));
+        const callList = Array.from(new Set(records?.map(elm => elm.call).sort())).filter(call => ((call ?? "").trim() !== ""));
 
         if(!callList){return;}
         
@@ -251,6 +257,8 @@
         let useJST = useJSTChkBox.checked;
         qsl_page.querySelector(".qsoHeader_time").innerHTML += "<br>" + ((isJA && useJST) ? "(JST)" : "(UTC)");
 
+
+        //Switch BAND or FREQ
         let includeFreq = datum.qsoData.reduce((accum, qso) => (accum || !isNaN(qso.freq)), false);
         if(includeFreq){
             // document.querySelector("#" + table_id + " .tablecell_megaHertz").appendChild(document.createTextNode("(MHz)"));
@@ -260,9 +268,52 @@
             qsl_page.querySelector(".qsoHeader_freq").innerHTML = "BAND";           
         }
         
+        //Switch RST or dB
+        let regexDB = /^[\+\-]\d{1,3}$/;
+        let regexRST = /^{1-5}{1-9}{1-9}?$/;
+        let includeDB = datum.qsoData.reduce((accum,qso) => (accum || regexDB.test(qso.rst_sent)), false);
+        let includeRST = datum.qsoData.reduce((accum,qso) => (accum || regexRST.test(qso.rst_sent)), false);
+        
+        if(includeDB && includeRST){
+            qsl_page.querySelector(".qsoHeader_report").innerHTML = "RST/dB";
+        } else if(includeDB && !includeRST){
+            qsl_page.querySelector(".qsoHeader_report").innerHTML = "dB";           
+        } else {
+            qsl_page.querySelector(".qsoHeader_report").innerHTML = "RST";           
+        }
+
 
         const maxQSOsRowInt = Number.isNaN(maxQSOsRowBox.value) ? maxQSOsRowDefault : Number.parseInt(maxQSOsRowBox.value);
 
+
+        // Function for format the notation of the frequency / 周波数表記のフォーマット
+        const formattingFreq = (freq) => {
+            
+            if(isNaN(freq)){return "FreqErr";}
+
+            let formattingStyle = freqDigitsStyleBox.value;
+            let numOfDigits = freqDigitsNumBox.value;
+            if(isNaN(numOfDigits)){
+                return "FreqErr";
+            }else{
+                numOfDigits = parseFloat(numOfDigits).toFixed(0);
+            }
+            switch (formattingStyle) {
+                case "freqDigitsStyle_precision":
+                    return parseFloat(freq).toPrecision(numOfDigits > 0 ? numOfDigits : 1);
+                    break;
+                
+                case "freqDigitsStyle_fixed":
+                    return parseFloat(freq).toFixed(numOfDigits >= 0 ? numOfDigits : 0);
+                    break;
+                case "freqDigitsStyle_noConv":
+                    return parseFloat(freq);
+                    break;               
+                default:
+                    return "FreqErr";
+                    break;
+            }
+        }
 
         // Fill the Table / 表に書き込む
         for(let j = 0; j < datum.qsoData.length; j++){
@@ -294,7 +345,7 @@
 
             const bandCell = tableRow.insertCell(-1);
             bandCell.className = "qsoDatumCell qsoDatum_band";
-            bandCell.appendChild(document.createTextNode( !isNaN(qso.freq) ? parseFloat(qso.freq).toPrecision(4) : qso.band));
+            bandCell.appendChild(document.createTextNode( !isNaN(qso.freq) ? formattingFreq(qso.freq) : qso.band));
 
             const modeCell = tableRow.insertCell(-1);
             modeCell.className = "qsoDatumCell qsoDatum_mode";
@@ -318,7 +369,7 @@
                 = (qso.qslmsgintl ? qso.qslmsgintl + "; " : "") 
                 + (qso.qslmsg ? qso.qslmsg + "; " : "")
                 + (qso.sat_name ? "via SAT: " + qso.sat_name + "; ": "")
-                + (!isNaN(qso.freq_rx) ? "RX Freq: " + parseFloat(qso.freq_rx).toPrecision(4).toString() + " MHz; " :  
+                + (!isNaN(qso.freq_rx) ? "RX Freq: " + formattingFreq(qso.freq_rx) + " MHz; " :  
                         (qso.band_rx ? "RX Band: " + qso.band_rx +"; ": "")
                     );
                 

@@ -9,6 +9,7 @@ https://www.jr2khb.net/qsl_maker/index.html
 - Open "index.html" on your browser.
 - Choose ADIF file.
 - Printable QSL Cards are generated dynamically and displayed.
+- Print cards using browser's print function (e.g. Ctrl + P)
 
 ## Script files included
 
