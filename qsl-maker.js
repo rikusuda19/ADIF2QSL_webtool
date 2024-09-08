@@ -26,6 +26,7 @@
         cardCounter = 0;
         statusTextArea.textContent = "Processing...";
 
+
         await repaint();
 
         if(files.length > 0){
@@ -57,6 +58,11 @@
         else{
             statusTextArea.innerText = "Choose an ADIF file."
         }
+
+        
+        switchOPField();
+        switchDEField();
+        switchCallSignBoxColor();
 
         await repaint();
     }
